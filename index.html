@@ -7,31 +7,46 @@
 
 <style>
 body {
-    background: black;
-    color: #00ffcc;
-    font-family: "Courier New", monospace;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
     text-align: center;
-    margin-top: 10%;
+}
+
+.container {
+    margin-top: 100px;
 }
 
 h1 {
-    text-shadow: 0 0 20px #00ffcc;
+    font-size: 40px;
+    margin-bottom: 20px;
 }
 
-input, button {
-    background: black;
-    border: 2px solid #00ffcc;
-    color: #00ffcc;
+input {
     padding: 12px;
-    margin: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    width: 200px;
     font-size: 16px;
-    box-shadow: 0 0 10px #00ffcc;
+}
+
+button {
+    padding: 12px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #00c6ff;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
 button:hover {
-    background: #00ffcc;
-    color: black;
-    cursor: pointer;
+    background: #0072ff;
+    transform: scale(1.05);
 }
 
 #menu {
@@ -39,48 +54,61 @@ button:hover {
     margin-top: 40px;
 }
 
-.linkBtn {
-    display: block;
+.card {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
     margin: 10px auto;
-    width: 250px;
+    width: 260px;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.2);
 }
 </style>
 </head>
 
 <body>
 
-<h1>🔐 DK RESELLS ACCESS</h1>
+<div class="container">
+
+<h1>DK RESELLS</h1>
 
 <div id="login">
-    <p>Indtast kode:</p>
+    <p>Enter access code</p>
     <input type="password" id="kode">
     <br>
-    <button onclick="tjekKode()">ENTER</button>
+    <button onclick="tjekKode()">Continue</button>
     <p id="fejl"></p>
 </div>
 
 <div id="menu">
-    <h2>🌐 Vælg side</h2>
+    <h2>Select destination</h2>
 
-    <button class="linkBtn" onclick="go('https://www.temu.com/')">Temu</button>
-    <button class="linkBtn" onclick="go('https://www.vinted.com/')">Vinted</button>
-    <button class="linkBtn" onclick="go('https://www.repdanes.dk')>RepDanes</button>
-    <button class="linkBtn" onclick="go('https://www.acbuy.com/product?id=970916386889&u=XNX5L3&source=AL')">Hoodie Supplier</button>
-    <button class="linkBtn" onclick="go('https://www.acbuy.com/product?id=922835150765&u=FIL339TES&source=AL')">Cap Supplier</button>
-    <button class="linkBtn" onclick="go('https://www.acbuy.com/product?id=837637789856&u=XNX5L3&source=AL')">T-Shirt Supplier</button>
+    <div class="card"><button onclick="go('https://www.temu.com/')">Temu</button></div>
+    <div class="card"><button onclick="go('https://www.vinted.com/')">Vinted</button></div>
+    <div class="card"><button onclick="go('https://wanes.dk/forsideww.repd')">RepDanes</button></div>
+    <div class="card"><button onclick="go('https://www.acbuy.com/product?id=970916386889&u=XNX5L3&source=AL')">Hoodie Supplier</button></div>
+    <div class="card"><button onclick="go('https://www.acbuy.com/product?id=922835150765&u=FIL339TES&source=AL')">Cap Supplier</button></div>
+    <div class="card"><button onclick="go('https://www.acbuy.com/product?id=837637789856&u=XNX5L3&source=AL')">T-Shirt Supplier</button></div>
+
+</div>
 
 </div>
 
 <script>
 function tjekKode() {
-    const rigtigKode = "1337"; // ← skift kode her
+    const rigtigKode = "1337"; // skift kode her
     const input = document.getElementById("kode").value;
 
     if (input === rigtigKode) {
         document.getElementById("login").style.display = "none";
         document.getElementById("menu").style.display = "block";
     } else {
-        document.getElementById("fejl").innerText = "Forkert kode!";
+        document.getElementById("fejl").innerText = "Forkert kode";
         document.getElementById("fejl").style.color = "red";
     }
 }
