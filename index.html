@@ -1,29 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="da">
 <head>
-    <title>Min side</title>
+<meta charset="UTF-8">
+<title>Secure Access</title>
+
+<style>
+    body {
+        background: black;
+        color: #00ffcc;
+        font-family: "Courier New", monospace;
+        text-align: center;
+        margin-top: 15%;
+    }
+
+    h1 {
+        font-size: 40px;
+        text-shadow: 0 0 20px #00ffcc;
+    }
+
+    input {
+        background: black;
+        border: 2px solid #00ffcc;
+        color: #00ffcc;
+        padding: 10px;
+        font-size: 18px;
+        outline: none;
+        text-align: center;
+        margin-top: 20px;
+        box-shadow: 0 0 10px #00ffcc;
+    }
+
+    button {
+        background: black;
+        border: 2px solid #00ffcc;
+        color: #00ffcc;
+        padding: 10px 20px;
+        font-size: 18px;
+        margin-top: 20px;
+        cursor: pointer;
+        box-shadow: 0 0 10px #00ffcc;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #00ffcc;
+        color: black;
+        box-shadow: 0 0 20px #00ffcc;
+    }
+
+    #status {
+        margin-top: 30px;
+        font-size: 20px;
+        height: 30px;
+    }
+
+    .blink {
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        50% { opacity: 0; }
+    }
+</style>
 </head>
-<body style="text-align:center; font-family:Arial; margin-top:100px;">
 
-    <h2>Indtast kode</h2>
+<body>
 
-    <input type="password" id="kode" placeholder="Skriv kode">
-    <button onclick="tjekKode()">Gå videre</button>
+<h1>🔐 SECURE ACCESS TERMINAL</h1>
 
-    <p id="fejl" style="color:red;"></p>
+<p>ENTER ACCESS CODE</p>
 
-    <script>
-        function tjekKode() {
-            var rigtigKode = "1234"; // ← skift til din egen kode
-            var input = document.getElementById("kode").value;
+<input type="password" id="kode" placeholder="••••••" onkeydown="checkEnter(event)">
+<br>
+<button onclick="tjekKode()">AUTHENTICATE</button>
 
-            if (input === rigtigKode) {
-                window.location.href = "https://www.youtube.com/";
-            } else {
-                document.getElementById("fejl").innerText = "Forkert kode!";
-            }
+<div id="status"></div>
+
+<script>
+    function checkEnter(event) {
+        if (event.key === "Enter") {
+            tjekKode();
         }
-    </script>
+    }
+
+    function tjekKode() {
+        const rigtigKode = "1337"; // ← skift kode her
+        const input = document.getElementById("kode").value;
+        const status = document.getElementById("status");
+
+        status.innerHTML = "<span class='blink'>Checking...</span>";
+
+        setTimeout(() => {
+            if (input === rigtigKode) {
+                status.innerHTML = "✅ ACCESS GRANTED";
+                status.style.color = "#00ffcc";
+
+                setTimeout(() => {
+                    window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+                }, 1500);
+
+            } else {
+                status.innerHTML = "❌ ACCESS DENIED";
+                status.style.color = "red";
+            }
+        }, 1000);
+    }
+</script>
 
 </body>
 </html>
