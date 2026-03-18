@@ -2,112 +2,93 @@
 <html lang="da">
 <head>
 <meta charset="UTF-8">
-<title>Secure Access</title>
+<title>DK Resells</title>
+<link rel="icon" href="logo.png">
 
 <style>
-    body {
-        background: black;
-        color: #00ffcc;
-        font-family: "Courier New", monospace;
-        text-align: center;
-        margin-top: 15%;
-    }
+body {
+    background: black;
+    color: #00ffcc;
+    font-family: "Courier New", monospace;
+    text-align: center;
+    margin-top: 10%;
+}
 
-    h1 {
-        font-size: 40px;
-        text-shadow: 0 0 20px #00ffcc;
-    }
+h1 {
+    text-shadow: 0 0 20px #00ffcc;
+}
 
-    input {
-        background: black;
-        border: 2px solid #00ffcc;
-        color: #00ffcc;
-        padding: 10px;
-        font-size: 18px;
-        outline: none;
-        text-align: center;
-        margin-top: 20px;
-        box-shadow: 0 0 10px #00ffcc;
-    }
+input, button {
+    background: black;
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    padding: 12px;
+    margin: 10px;
+    font-size: 16px;
+    box-shadow: 0 0 10px #00ffcc;
+}
 
-    button {
-        background: black;
-        border: 2px solid #00ffcc;
-        color: #00ffcc;
-        padding: 10px 20px;
-        font-size: 18px;
-        margin-top: 20px;
-        cursor: pointer;
-        box-shadow: 0 0 10px #00ffcc;
-        transition: 0.3s;
-    }
+button:hover {
+    background: #00ffcc;
+    color: black;
+    cursor: pointer;
+}
 
-    button:hover {
-        background: #00ffcc;
-        color: black;
-        box-shadow: 0 0 20px #00ffcc;
-    }
+#menu {
+    display: none;
+    margin-top: 40px;
+}
 
-    #status {
-        margin-top: 30px;
-        font-size: 20px;
-        height: 30px;
-    }
-
-    .blink {
-        animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-        50% { opacity: 0; }
-    }
+.linkBtn {
+    display: block;
+    margin: 10px auto;
+    width: 250px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🔐 SECURE ACCESS TERMINAL</h1>
+<h1>🔐 DK RESELLS ACCESS</h1>
 
-<p>ENTER ACCESS CODE</p>
+<div id="login">
+    <p>Indtast kode:</p>
+    <input type="password" id="kode">
+    <br>
+    <button onclick="tjekKode()">ENTER</button>
+    <p id="fejl"></p>
+</div>
 
-<input type="password" id="kode" placeholder="••••••" onkeydown="checkEnter(event)">
-<br>
-<button onclick="tjekKode()">AUTHENTICATE</button>
+<div id="menu">
+    <h2>🌐 Vælg side</h2>
 
-<div id="status"></div>
+    <button class="linkBtn" onclick="go('https://www.temu.com/')">Temu</button>
+    <button class="linkBtn" onclick="go('https://www.vinted.com/')">Vinted</button>
+    <button class="linkBtn" onclick="go('https://wanes.dk/forsideww.repd')">RepDanes</button>
+    <button class="linkBtn" onclick="go('https://www.acbuy.com/product?id=970916386889&u=XNX5L3&source=AL')">Hoodie Supplier</button>
+    <button class="linkBtn" onclick="go('https://www.acbuy.com/product?id=922835150765&u=FIL339TES&source=AL')">Cap Supplier</button>
+    <button class="linkBtn" onclick="go('https://www.acbuy.com/product?id=837637789856&u=XNX5L3&source=AL')">T-Shirt Supplier</button>
+
+</div>
 
 <script>
-    function checkEnter(event) {
-        if (event.key === "Enter") {
-            tjekKode();
-        }
+function tjekKode() {
+    const rigtigKode = "1234"; // ← skift kode her
+    const input = document.getElementById("kode").value;
+
+    if (input === rigtigKode) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("menu").style.display = "block";
+    } else {
+        document.getElementById("fejl").innerText = "Forkert kode!";
+        document.getElementById("fejl").style.color = "red";
     }
+}
 
-    function tjekKode() {
-        const rigtigKode = "1337"; // ← skift kode her
-        const input = document.getElementById("kode").value;
-        const status = document.getElementById("status");
-
-        status.innerHTML = "<span class='blink'>Checking...</span>";
-
-        setTimeout(() => {
-            if (input === rigtigKode) {
-                status.innerHTML = "✅ ACCESS GRANTED";
-                status.style.color = "#00ffcc";
-
-                setTimeout(() => {
-                    window.location.href = "https://www.acbuy.com/product?id=837637789856&u=XNX5L3&source=AL";
-                }, 1500);
-
-            } else {
-                status.innerHTML = "❌ ACCESS DENIED";
-                status.style.color = "red";
-            }
-        }, 1000);
-    }
+function go(url) {
+    window.location.href = url;
+}
 </script>
 
 </body>
 </html>
-<link rel="icon" href="logo.png">
-<title>DK Resells</title>
