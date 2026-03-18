@@ -9,56 +9,56 @@
 body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
-    background: radial-gradient(circle at top, #0f2027, #0a0f1a);
+    background: black;
     color: white;
     overflow: hidden;
 }
 
-/* Glow background */
+/* Animated gradient */
 body::before {
     content: "";
     position: absolute;
     width: 200%;
     height: 200%;
-    background: linear-gradient(45deg, #00c6ff, #0072ff, #00c6ff);
-    animation: move 8s linear infinite;
-    opacity: 0.1;
+    background: linear-gradient(60deg, #00c6ff, #0072ff, #00c6ff);
+    animation: bgMove 10s linear infinite;
+    opacity: 0.08;
 }
 
-@keyframes move {
-    0% { transform: translate(-25%, -25%) rotate(0deg); }
-    100% { transform: translate(-25%, -25%) rotate(360deg); }
+@keyframes bgMove {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .container {
     position: relative;
     z-index: 2;
     text-align: center;
-    margin-top: 10%;
+    margin-top: 8%;
 }
 
 h1 {
     font-size: 42px;
-    letter-spacing: 2px;
     text-shadow: 0 0 20px #00c6ff;
 }
 
+/* Glass UI */
 .glass {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.07);
     border-radius: 20px;
     padding: 30px;
-    width: 300px;
+    width: 320px;
     margin: auto;
     backdrop-filter: blur(15px);
-    box-shadow: 0 0 30px rgba(0,198,255,0.2);
+    box-shadow: 0 0 40px rgba(0,198,255,0.2);
 }
 
+/* Inputs & buttons */
 input {
-    width: 80%;
+    width: 85%;
     padding: 12px;
     border-radius: 10px;
     border: none;
-    outline: none;
     margin-top: 15px;
     font-size: 16px;
 }
@@ -76,20 +76,37 @@ button {
 }
 
 button:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 15px #00c6ff;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #00c6ff;
 }
 
+/* Menu */
 #menu {
     display: none;
-    margin-top: 30px;
+    margin-top: 20px;
 }
 
 .link {
-    margin: 10px;
     display: block;
+    margin: 10px auto;
+    width: 260px;
 }
 
+/* Scan animation */
+#scan {
+    display: none;
+    margin-top: 20px;
+    height: 4px;
+    background: #00c6ff;
+    animation: scan 1s infinite;
+}
+
+@keyframes scan {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+/* Status text */
 .status {
     margin-top: 10px;
     height: 20px;
@@ -104,10 +121,11 @@ button:hover {
 <h1>DK RESELLS SYSTEM</h1>
 
 <div id="login" class="glass">
-    <p>Secure Login</p>
-    <input type="password" id="kode" placeholder="Access Code">
+    <p>Biometric Access</p>
+    <input type="password" id="kode" placeholder="Enter Code" onkeydown="enter(event)">
     <br>
-    <button onclick="tjekKode()">Unlock</button>
+    <button onclick="tjekKode()">Authenticate</button>
+    <div id="scan"></div>
     <div class="status" id="status"></div>
 </div>
 
@@ -116,7 +134,7 @@ button:hover {
 
     <button class="link" onclick="go('https://www.temu.com/')">Temu</button>
     <button class="link" onclick="go('https://www.vinted.com/')">Vinted</button>
-    <button class="link" onclick="go('https://www.repdanes.dk/forside')">RepDanes</button>
+    <button class="link" onclick="go('https://wanes.dk/forsideww.repd')">RepDanes</button>
     <button class="link" onclick="go('https://www.acbuy.com/product?id=970916386889&u=XNX5L3&source=AL')">Hoodie Supplier</button>
     <button class="link" onclick="go('https://www.acbuy.com/product?id=922835150765&u=FIL339TES&source=AL')">Cap Supplier</button>
     <button class="link" onclick="go('https://www.acbuy.com/product?id=837637789856&u=XNX5L3&source=AL')">T-Shirt Supplier</button>
@@ -126,33 +144,54 @@ button:hover {
 </div>
 
 <script>
+function enter(e){
+    if(e.key === "Enter") tjekKode();
+}
+
+function playSound(freq){
+    let ctx = new AudioContext();
+    let osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    osc.connect(ctx.destination);
+    osc.start();
+    setTimeout(()=>osc.stop(),150);
+}
+
 function tjekKode() {
-    const kode = "1234"; // skift her
+    const kode = "1234";
     const input = document.getElementById("kode").value;
     const status = document.getElementById("status");
+    const scan = document.getElementById("scan");
 
-    status.innerText = "Checking...";
+    scan.style.display = "block";
+    status.innerText = "Scanning...";
     status.style.color = "#00c6ff";
+    playSound(400);
 
     setTimeout(() => {
         if (input === kode) {
             status.innerText = "Access Granted";
             status.style.color = "lightgreen";
+            playSound(800);
 
             setTimeout(() => {
                 document.getElementById("login").style.display = "none";
                 document.getElementById("menu").style.display = "block";
-            }, 800);
+            }, 1000);
 
         } else {
             status.innerText = "Access Denied";
             status.style.color = "red";
+            playSound(200);
+            scan.style.display = "none";
         }
-    }, 1000);
+    }, 1500);
 }
 
 function go(url) {
-    window.location.href = url;
+    playSound(600);
+    setTimeout(()=>{ window.location.href = url; }, 200);
 }
 </script>
 
