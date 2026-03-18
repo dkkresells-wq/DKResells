@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <title>Min hemmelige side</title>
+</head>
+<body style="text-align:center; font-family:Arial; margin-top:100px;">
+
+<h2>🔐 Indtast adgangskode</h2>
+
+<input type="password" id="kode" placeholder="Kode">
+<br><br>
+<button onclick="tjekKode()">Log ind</button>
+
+<p id="fejl" style="color:red;"></p>
+
+<script>
+function tjekKode() {
+  var kode = document.getElementById("kode").value;
+
+  if (kode === "1234") {
+    document.body.innerHTML = `
+      <h1>Velkommen 🎉</h1>
+      <p>Du er nu inde!</p>
+    `;
+  } else {
+    document.getElementById("fejl").innerText = "Forkert kode!";
+  }
+}
+</script>
+
+</body>
+</html>
