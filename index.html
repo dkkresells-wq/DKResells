@@ -8,36 +8,67 @@
 <style>
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #0f2027, #0a0f1a);
     color: white;
-    text-align: center;
+    overflow: hidden;
+}
+
+/* Glow background */
+body::before {
+    content: "";
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, #00c6ff, #0072ff, #00c6ff);
+    animation: move 8s linear infinite;
+    opacity: 0.1;
+}
+
+@keyframes move {
+    0% { transform: translate(-25%, -25%) rotate(0deg); }
+    100% { transform: translate(-25%, -25%) rotate(360deg); }
 }
 
 .container {
-    margin-top: 100px;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    margin-top: 10%;
 }
 
 h1 {
-    font-size: 40px;
-    margin-bottom: 20px;
+    font-size: 42px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px #00c6ff;
+}
+
+.glass {
+    background: rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 30px;
+    width: 300px;
+    margin: auto;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 0 30px rgba(0,198,255,0.2);
 }
 
 input {
+    width: 80%;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: none;
     outline: none;
-    width: 200px;
+    margin-top: 15px;
     font-size: 16px;
 }
 
 button {
+    margin-top: 15px;
     padding: 12px 20px;
-    margin: 10px;
     border: none;
-    border-radius: 8px;
-    background: #00c6ff;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
     color: white;
     font-size: 16px;
     cursor: pointer;
@@ -45,28 +76,23 @@ button {
 }
 
 button:hover {
-    background: #0072ff;
-    transform: scale(1.05);
+    transform: scale(1.08);
+    box-shadow: 0 0 15px #00c6ff;
 }
 
 #menu {
     display: none;
-    margin-top: 40px;
+    margin-top: 30px;
 }
 
-.card {
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 20px;
-    margin: 10px auto;
-    width: 260px;
-    transition: 0.3s;
+.link {
+    margin: 10px;
+    display: block;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    background: rgba(255,255,255,0.2);
+.status {
+    margin-top: 10px;
+    height: 20px;
 }
 </style>
 </head>
@@ -75,25 +101,25 @@ button:hover {
 
 <div class="container">
 
-<h1>DK RESELLS</h1>
+<h1>DK RESELLS SYSTEM</h1>
 
-<div id="login">
-    <p>Enter access code</p>
-    <input type="password" id="kode">
+<div id="login" class="glass">
+    <p>Secure Login</p>
+    <input type="password" id="kode" placeholder="Access Code">
     <br>
-    <button onclick="tjekKode()">Continue</button>
-    <p id="fejl"></p>
+    <button onclick="tjekKode()">Unlock</button>
+    <div class="status" id="status"></div>
 </div>
 
-<div id="menu">
-    <h2>Select destination</h2>
+<div id="menu" class="glass">
+    <h2>Dashboard</h2>
 
-    <div class="card"><button onclick="go('https://www.temu.com/')">Temu</button></div>
-    <div class="card"><button onclick="go('https://www.vinted.com/')">Vinted</button></div>
-    <div class="card"><button onclick="go('https://wanes.dk/forsideww.repd')">RepDanes</button></div>
-    <div class="card"><button onclick="go('https://www.acbuy.com/product?id=970916386889&u=XNX5L3&source=AL')">Hoodie Supplier</button></div>
-    <div class="card"><button onclick="go('https://www.acbuy.com/product?id=922835150765&u=FIL339TES&source=AL')">Cap Supplier</button></div>
-    <div class="card"><button onclick="go('https://www.acbuy.com/product?id=837637789856&u=XNX5L3&source=AL')">T-Shirt Supplier</button></div>
+    <button class="link" onclick="go('https://www.temu.com/')">Temu</button>
+    <button class="link" onclick="go('https://www.vinted.com/')">Vinted</button>
+    <button class="link" onclick="go('https://wanes.dk/forsideww.repd')">RepDanes</button>
+    <button class="link" onclick="go('https://www.acbuy.com/product?id=970916386889&u=XNX5L3&source=AL')">Hoodie Supplier</button>
+    <button class="link" onclick="go('https://www.acbuy.com/product?id=922835150765&u=FIL339TES&source=AL')">Cap Supplier</button>
+    <button class="link" onclick="go('https://www.acbuy.com/product?id=837637789856&u=XNX5L3&source=AL')">T-Shirt Supplier</button>
 
 </div>
 
@@ -101,16 +127,28 @@ button:hover {
 
 <script>
 function tjekKode() {
-    const rigtigKode = "1337"; // skift kode her
+    const kode = "1234"; // skift her
     const input = document.getElementById("kode").value;
+    const status = document.getElementById("status");
 
-    if (input === rigtigKode) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("menu").style.display = "block";
-    } else {
-        document.getElementById("fejl").innerText = "Forkert kode";
-        document.getElementById("fejl").style.color = "red";
-    }
+    status.innerText = "Checking...";
+    status.style.color = "#00c6ff";
+
+    setTimeout(() => {
+        if (input === kode) {
+            status.innerText = "Access Granted";
+            status.style.color = "lightgreen";
+
+            setTimeout(() => {
+                document.getElementById("login").style.display = "none";
+                document.getElementById("menu").style.display = "block";
+            }, 800);
+
+        } else {
+            status.innerText = "Access Denied";
+            status.style.color = "red";
+        }
+    }, 1000);
 }
 
 function go(url) {
