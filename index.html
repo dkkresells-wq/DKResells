@@ -10,11 +10,27 @@
     position:fixed; top:10px; left:10px; color:white;
     background:rgba(0,0,0,0.4); padding:10px; border-radius:10px;
   }
+  #gameOver {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    background:black; color:white; padding:20px; border-radius:15px;
+    display:none; text-align:center;
+  }
+  button { padding:10px 20px; margin-top:10px; }
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
-<div id="ui">Speed: <span id="speed">0</span></div>
+<div id="ui">
+  Speed: <span id="speed">0</span><br>
+  Score: <span id="score">0</span><br>
+  Highscore: <span id="highscore">0</span>
+</div>
+
+<div id="gameOver">
+  <h2>Game Over</h2>
+  <p id="finalScore"></p>
+  <button onclick="restartGame()">Spil igen</button>
+</div>
 
 <script>
 const canvas = document.getElementById("game");
@@ -23,13 +39,19 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let speed = 0;
-let wheelie = false;
 let score = 0;
+let gameRunning = true;
+
+let highscore = localStorage.getItem("highscore") || 0;
+document.getElementById("highscore").innerText = highscore;
+
+const bikeImg = new Image();
+bikeImg.src = "https://i.imgur.com/6X4JQ0G.png"; // crosser billede
 
 const player = {
   x: canvas.width/2,
   y: canvas.height - 150,
-  width: 50,
+  width: 80,
   height: 80,
   angle: 0
 };
@@ -37,10 +59,14 @@ const player = {
 const cars = [];
 
 const keys = {};
-document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+document.addEventListener("keydown", e => {
+  keys[e.key.toLowerCase()] = true;
+  audioCtx.resume();
+});
 document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
 function spawnCar() {
+  if (!gameRunning) return;
   cars.push({
     x: canvas.width/2 + (Math.random()*120 - 60),
     y: -100,
@@ -49,35 +75,20 @@ function spawnCar() {
     speed: 5 + Math.random()*3
   });
 }
-
 setInterval(spawnCar, 1500);
 
 function drawBackground() {
-  // Sky
   let grad = ctx.createLinearGradient(0,0,0,canvas.height);
   grad.addColorStop(0, "#87CEEB");
   grad.addColorStop(1, "#FFDAB9");
   ctx.fillStyle = grad;
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // Ocean
   ctx.fillStyle = "#1e90ff";
   ctx.fillRect(0, canvas.height/2 + 50, canvas.width, 200);
 
-  // Sand
   ctx.fillStyle = "#f4a460";
   ctx.fillRect(0, canvas.height/2, canvas.width, 100);
-
-  // Palm trees
-  for (let i=0;i<5;i++) {
-    let x = i*300 + 50;
-    ctx.fillStyle = "brown";
-    ctx.fillRect(x, canvas.height/2 - 80, 10, 80);
-    ctx.fillStyle = "green";
-    ctx.beginPath();
-    ctx.arc(x+5, canvas.height/2 - 90, 30, 0, Math.PI*2);
-    ctx.fill();
-  }
 }
 
 function drawRoad() {
@@ -98,10 +109,7 @@ function drawPlayer() {
   ctx.save();
   ctx.translate(player.x, player.y);
   ctx.rotate(player.angle);
-
-  ctx.fillStyle = "red";
-  ctx.fillRect(-player.width/2, -player.height/2, player.width, player.height);
-
+  ctx.drawImage(bikeImg, -player.width/2, -player.height/2, player.width, player.height);
   ctx.restore();
 }
 
@@ -116,39 +124,53 @@ function updateCars() {
   cars.forEach(car => {
     car.y += car.speed + speed;
 
-    // Collision
     if (
       car.x < player.x + player.width/2 &&
       car.x + car.width > player.x - player.width/2 &&
       car.y < player.y + player.height/2 &&
       car.y + car.height > player.y - player.height/2
     ) {
-      alert("Game Over! Score: " + score);
-      location.reload();
+      endGame();
     }
   });
 }
 
 function update() {
+  if (!gameRunning) return;
+
   if (keys["w"]) speed += 0.2;
   else speed *= 0.98;
 
   if (keys["a"]) player.x -= 5;
   if (keys["d"]) player.x += 5;
 
-  if (keys["shift"]) {
-    wheelie = true;
-    player.angle = -0.6;
-  } else {
-    wheelie = false;
-    player.angle = 0;
-  }
+  if (keys["shift"]) player.angle = -0.6;
+  else player.angle = 0;
 
   score += Math.floor(speed);
+
   document.getElementById("speed").innerText = Math.floor(speed);
+  document.getElementById("score").innerText = score;
 }
 
-// Simple engine sound
+function endGame() {
+  gameRunning = false;
+
+  if (score > highscore) {
+    highscore = score;
+    localStorage.setItem("highscore", highscore);
+  }
+
+  document.getElementById("finalScore").innerText = "Score: " + score;
+  document.getElementById("highscore").innerText = highscore;
+  document.getElementById("gameOver").style.display = "block";
+}
+
+function restartGame() {
+  location.reload();
+}
+
+// lyd
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let oscillator = audioCtx.createOscillator();
 oscillator.type = "sawtooth";
@@ -157,6 +179,7 @@ oscillator.connect(audioCtx.destination);
 oscillator.start();
 
 function updateSound() {
+  if (!gameRunning) return;
   oscillator.frequency.value = 50 + speed * 20;
 }
 
