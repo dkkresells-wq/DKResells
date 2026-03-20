@@ -1,204 +1,116 @@
-<!DOCTYPE html>
-<html lang="da">
-<head>
-<meta charset="UTF-8">
-<title>Crosser Game Deluxe</title>
-<style>
-  body { margin:0; overflow:hidden; font-family:sans-serif; }
-  canvas { display:block; }
-  #ui {
-    position:fixed; top:10px; left:10px; color:white;
-    background:rgba(0,0,0,0.4); padding:10px; border-radius:10px;
-  }
-  #gameOver {
-    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    background:black; color:white; padding:20px; border-radius:15px;
-    display:none; text-align:center;
-  }
-  button { padding:10px 20px; margin-top:10px; }
-</style>
-</head>
-<body>
-<canvas id="game"></canvas>
-<div id="ui">
-  Speed: <span id="speed">0</span><br>
-  Score: <span id="score">0</span><br>
-  Highscore: <span id="highscore">0</span>
-</div>
+import React, { useEffect, useRef, useState } from "react";
 
-<div id="gameOver">
-  <h2>Game Over</h2>
-  <p id="finalScore"></p>
-  <button onclick="restartGame()">Spil igen</button>
-</div>
+export default function BeachCrosserGame() {
+  const canvasRef = useRef(null);
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
 
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
 
-let speed = 0;
-let score = 0;
-let gameRunning = true;
+    let bike = { x: 50, y: 200, vy: 0, onGround: true, tilt: 0 };
+    let gravity = 0.5;
+    let speed = 4;
+    let obstacles = [];
+    let keys = {};
+    let gameScore = 0;
 
-let highscore = localStorage.getItem("highscore") || 0;
-document.getElementById("highscore").innerText = highscore;
-
-const bikeImg = new Image();
-bikeImg.src = "https://i.imgur.com/6X4JQ0G.png"; // crosser billede
-
-const player = {
-  x: canvas.width/2,
-  y: canvas.height - 150,
-  width: 80,
-  height: 80,
-  angle: 0
-};
-
-const cars = [];
-
-const keys = {};
-document.addEventListener("keydown", e => {
-  keys[e.key.toLowerCase()] = true;
-  audioCtx.resume();
-});
-document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
-
-function spawnCar() {
-  if (!gameRunning) return;
-  cars.push({
-    x: canvas.width/2 + (Math.random()*120 - 60),
-    y: -100,
-    width: 40,
-    height: 80,
-    speed: 5 + Math.random()*3
-  });
-}
-setInterval(spawnCar, 1500);
-
-function drawBackground() {
-  let grad = ctx.createLinearGradient(0,0,0,canvas.height);
-  grad.addColorStop(0, "#87CEEB");
-  grad.addColorStop(1, "#FFDAB9");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  ctx.fillStyle = "#1e90ff";
-  ctx.fillRect(0, canvas.height/2 + 50, canvas.width, 200);
-
-  ctx.fillStyle = "#f4a460";
-  ctx.fillRect(0, canvas.height/2, canvas.width, 100);
-}
-
-function drawRoad() {
-  ctx.fillStyle = "#333";
-  ctx.fillRect(canvas.width/2 - 100, 0, 200, canvas.height);
-
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 5;
-  for (let i=0;i<canvas.height;i+=40) {
-    ctx.beginPath();
-    ctx.moveTo(canvas.width/2, i);
-    ctx.lineTo(canvas.width/2, i+20);
-    ctx.stroke();
-  }
-}
-
-function drawPlayer() {
-  ctx.save();
-  ctx.translate(player.x, player.y);
-  ctx.rotate(player.angle);
-  ctx.drawImage(bikeImg, -player.width/2, -player.height/2, player.width, player.height);
-  ctx.restore();
-}
-
-function drawCars() {
-  ctx.fillStyle = "black";
-  cars.forEach(car => {
-    ctx.fillRect(car.x - car.width/2, car.y, car.width, car.height);
-  });
-}
-
-function updateCars() {
-  cars.forEach(car => {
-    car.y += car.speed + speed;
-
-    if (
-      car.x < player.x + player.width/2 &&
-      car.x + car.width > player.x - player.width/2 &&
-      car.y < player.y + player.height/2 &&
-      car.y + car.height > player.y - player.height/2
-    ) {
-      endGame();
+    function spawnObstacle() {
+      obstacles.push({ x: canvas.width, y: 220, w: 30, h: 30 });
     }
-  });
+
+    function drawBike() {
+      ctx.save();
+      ctx.translate(bike.x, bike.y);
+      ctx.rotate(bike.tilt);
+      ctx.fillStyle = "black";
+      ctx.fillRect(-10, -10, 30, 10);
+      ctx.restore();
+    }
+
+    function drawBackground() {
+      // sky
+      ctx.fillStyle = "#87CEEB";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // sea
+      ctx.fillStyle = "#1E90FF";
+      ctx.fillRect(0, 150, canvas.width, 50);
+
+      // sand
+      ctx.fillStyle = "#F4A460";
+      ctx.fillRect(0, 200, canvas.width, 100);
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBackground();
+
+      // gravity
+      bike.vy += gravity;
+      bike.y += bike.vy;
+
+      if (bike.y >= 200) {
+        bike.y = 200;
+        bike.vy = 0;
+        bike.onGround = true;
+        bike.tilt *= 0.9;
+      } else {
+        bike.onGround = false;
+      }
+
+      // wheelie (SHIFT)
+      if (keys["Shift"]) {
+        bike.tilt = -0.5;
+      }
+
+      // obstacles
+      obstacles.forEach((obs, i) => {
+        obs.x -= speed;
+        ctx.fillStyle = "red";
+        ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+
+        // collision
+        if (
+          bike.x < obs.x + obs.w &&
+          bike.x + 20 > obs.x &&
+          bike.y < obs.y + obs.h &&
+          bike.y + 10 > obs.y
+        ) {
+          gameScore = 0;
+          obstacles = [];
+        }
+      });
+
+      // remove offscreen
+      obstacles = obstacles.filter((o) => o.x > -50);
+
+      drawBike();
+
+      gameScore++;
+      setScore(gameScore);
+      if (gameScore > highScore) setHighScore(gameScore);
+
+      requestAnimationFrame(update);
+    }
+
+    let obstacleInterval = setInterval(spawnObstacle, 1500);
+
+    window.addEventListener("keydown", (e) => (keys[e.key] = true));
+    window.addEventListener("keyup", (e) => (keys[e.key] = false));
+
+    update();
+
+    return () => clearInterval(obstacleInterval);
+  }, [highScore]);
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <h1 className="text-2xl font-bold">🏍️ Beach Crosser</h1>
+      <p>Score: {score} | High Score: {highScore}</p>
+      <canvas ref={canvasRef} width={600} height={300} className="border rounded-xl shadow" />
+      <p>Controls: Hold SHIFT to wheelie 🤘</p>
+    </div>
+  );
 }
-
-function update() {
-  if (!gameRunning) return;
-
-  if (keys["w"]) speed += 0.2;
-  else speed *= 0.98;
-
-  if (keys["a"]) player.x -= 5;
-  if (keys["d"]) player.x += 5;
-
-  if (keys["shift"]) player.angle = -0.6;
-  else player.angle = 0;
-
-  score += Math.floor(speed);
-
-  document.getElementById("speed").innerText = Math.floor(speed);
-  document.getElementById("score").innerText = score;
-}
-
-function endGame() {
-  gameRunning = false;
-
-  if (score > highscore) {
-    highscore = score;
-    localStorage.setItem("highscore", highscore);
-  }
-
-  document.getElementById("finalScore").innerText = "Score: " + score;
-  document.getElementById("highscore").innerText = highscore;
-  document.getElementById("gameOver").style.display = "block";
-}
-
-function restartGame() {
-  location.reload();
-}
-
-// lyd
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let oscillator = audioCtx.createOscillator();
-oscillator.type = "sawtooth";
-oscillator.frequency.value = 0;
-oscillator.connect(audioCtx.destination);
-oscillator.start();
-
-function updateSound() {
-  if (!gameRunning) return;
-  oscillator.frequency.value = 50 + speed * 20;
-}
-
-function gameLoop() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  drawBackground();
-  drawRoad();
-  drawPlayer();
-  drawCars();
-
-  update();
-  updateCars();
-  updateSound();
-
-  requestAnimationFrame(gameLoop);
-}
-
-gameLoop();
-</script>
-</body>
-</html>
