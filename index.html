@@ -15,18 +15,15 @@ body {
   color: white;
 }
 
-/* Center */
 .center {
   text-align: center;
-  padding: 60px 20px;
+  padding: 60px;
 }
 
-/* Cards */
 .cards {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-top: 40px;
 }
 
 .card {
@@ -42,7 +39,6 @@ body {
   box-shadow: 0 0 20px cyan;
 }
 
-/* Pages */
 .page {
   display: none;
   padding: 20px;
@@ -155,6 +151,18 @@ function randomPrice() {
   return Math.floor(Math.random() * 1200) + 300;
 }
 
+function hideAll() {
+  document.getElementById("home").style.display = "none";
+  document.getElementById("hoodiesPage").style.display = "none";
+  document.getElementById("productPage").style.display = "none";
+  document.getElementById("cartPage").style.display = "none";
+}
+
+function goHome() {
+  hideAll();
+  document.getElementById("home").style.display = "block";
+}
+
 function showHoodies() {
   hideAll();
   document.getElementById("hoodiesPage").style.display = "block";
@@ -188,6 +196,10 @@ function openProduct(img, price) {
 }
 
 function addToCart() {
+  if (!currentProduct) {
+    alert("Vælg et produkt først!");
+    return;
+  }
 
   if (!userEmail) {
     userEmail = prompt("Indtast din email:");
@@ -206,12 +218,22 @@ function openCart() {
   const list = document.getElementById("cartItems");
   list.innerHTML = "";
 
+  if (cart.length === 0) {
+    list.innerHTML = "<p>Kurven er tom</p>";
+    return;
+  }
+
   cart.forEach(item => {
-    list.innerHTML += `<p>${item.price} DKK</p>`;
+    list.innerHTML += `<p>Hoodie - ${item.price} DKK</p>`;
   });
 }
 
 function checkout() {
+  if (cart.length === 0) {
+    alert("Kurven er tom!");
+    return;
+  }
+
   let text = "Ny ordre fra: " + userEmail + "\\n\\n";
 
   cart.forEach(item => {
@@ -220,18 +242,6 @@ function checkout() {
 
   window.location.href =
     `mailto:dinemail@gmail.com?subject=Ny ordre&body=${encodeURIComponent(text)}`;
-}
-
-function goHome() {
-  hideAll();
-  document.getElementById("home").style.display = "block";
-}
-
-function hideAll() {
-  document.getElementById("home").style.display = "none";
-  document.getElementById("hoodiesPage").style.display = "none";
-  document.getElementById("productPage").style.display = "none";
-  document.getElementById("cartPage").style.display = "none";
 }
 </script>
 
