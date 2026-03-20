@@ -9,64 +9,60 @@ export default function BeachCrosserGame() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    let bike = { x: 50, y: 200, vy: 0, onGround: true, tilt: 0 };
-    let gravity = 0.5;
+    let bike = { x: 80, y: 200, vy: 0, width: 30, height: 15 };
+    let gravity = 0.6;
     let speed = 4;
     let obstacles = [];
     let keys = {};
     let gameScore = 0;
 
     function spawnObstacle() {
-      obstacles.push({ x: canvas.width, y: 220, w: 30, h: 30 });
-    }
-
-    function drawBike() {
-      ctx.save();
-      ctx.translate(bike.x, bike.y);
-      ctx.rotate(bike.tilt);
-      ctx.fillStyle = "black";
-      ctx.fillRect(-10, -10, 30, 10);
-      ctx.restore();
+      obstacles.push({ x: canvas.width, y: 210, w: 25, h: 25 });
     }
 
     function drawBackground() {
-      // sky
       ctx.fillStyle = "#87CEEB";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // sea
       ctx.fillStyle = "#1E90FF";
-      ctx.fillRect(0, 150, canvas.width, 50);
+      ctx.fillRect(0, 140, canvas.width, 40);
 
-      // sand
       ctx.fillStyle = "#F4A460";
-      ctx.fillRect(0, 200, canvas.width, 100);
+      ctx.fillRect(0, 180, canvas.width, 120);
+    }
+
+    function drawBike() {
+      ctx.fillStyle = "black";
+      ctx.fillRect(bike.x, bike.y, bike.width, bike.height);
     }
 
     function update() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawBackground();
 
-      // gravity
+      // hop
+      if (keys[" "] && bike.y >= 200) {
+        bike.vy = -10;
+      }
+
+      // fysik
       bike.vy += gravity;
       bike.y += bike.vy;
 
+      // hold på vejen (IKKE falde igennem)
       if (bike.y >= 200) {
         bike.y = 200;
         bike.vy = 0;
-        bike.onGround = true;
-        bike.tilt *= 0.9;
-      } else {
-        bike.onGround = false;
       }
 
-      // wheelie (SHIFT)
-      if (keys["Shift"]) {
-        bike.tilt = -0.5;
+      // begræns til venstre/højre
+      if (bike.x < 0) bike.x = 0;
+      if (bike.x > canvas.width - bike.width) {
+        bike.x = canvas.width - bike.width;
       }
 
       // obstacles
-      obstacles.forEach((obs, i) => {
+      obstacles.forEach((obs) => {
         obs.x -= speed;
         ctx.fillStyle = "red";
         ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
@@ -74,16 +70,15 @@ export default function BeachCrosserGame() {
         // collision
         if (
           bike.x < obs.x + obs.w &&
-          bike.x + 20 > obs.x &&
+          bike.x + bike.width > obs.x &&
           bike.y < obs.y + obs.h &&
-          bike.y + 10 > obs.y
+          bike.y + bike.height > obs.y
         ) {
           gameScore = 0;
           obstacles = [];
         }
       });
 
-      // remove offscreen
       obstacles = obstacles.filter((o) => o.x > -50);
 
       drawBike();
@@ -106,11 +101,16 @@ export default function BeachCrosserGame() {
   }, [highScore]);
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <h1 className="text-2xl font-bold">🏍️ Beach Crosser</h1>
+    <div style={{ textAlign: "center" }}>
+      <h1>🏍️ Beach Crosser</h1>
       <p>Score: {score} | High Score: {highScore}</p>
-      <canvas ref={canvasRef} width={600} height={300} className="border rounded-xl shadow" />
-      <p>Controls: Hold SHIFT to wheelie 🤘</p>
+      <canvas
+        ref={canvasRef}
+        width={600}
+        height={300}
+        style={{ border: "2px solid black", borderRadius: "10px" }}
+      />
+      <p>SPACE = hop</p>
     </div>
   );
 }
