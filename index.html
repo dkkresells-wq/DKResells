@@ -1,141 +1,114 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-<meta charset="UTF-8">
-<title>DK Resells</title>
-<link rel="icon" href="logo.png">
+  <meta charset="UTF-8">
+  <title>Crosser Spil</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      text-align: center;
+      background: #222;
+      color: white;
+    }
 
-<style>
-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    color: white;
-    text-align: center;
+    #login {
+      margin-top: 100px;
+    }
 
-    background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.9)),
-    url("https://upload.wikimedia.org/wikipedia/commons/9/9c/Flag_of_Denmark.svg");
-    background-size: cover;
-    background-position: center;
-}
+    #game {
+      display: none;
+    }
 
-h1 {
-    margin-top: 80px;
-    font-size: 42px;
-    text-shadow: 0 0 15px #00c6ff;
-}
-
-/* glass box */
-.box {
-    background: rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 30px;
-    width: 300px;
-    margin: 30px auto;
-    backdrop-filter: blur(10px);
-}
-
-/* input */
-input {
-    padding: 12px;
-    width: 80%;
-    border-radius: 10px;
-    border: none;
-}
-
-/* buttons */
-button {
-    margin-top: 10px;
-    padding: 12px 20px;
-    border-radius: 10px;
-    border: none;
-    background: linear-gradient(90deg, #00c6ff, #0072ff);
-    color: white;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-button:hover {
-    transform: scale(1.05);
-}
-
-/* menu hidden */
-#menu {
-    display: none;
-}
-
-.link {
-    display: block;
-    margin: 10px auto;
-    width: 250px;
-}
-
-.status {
-    margin-top: 10px;
-}
-</style>
+    canvas {
+      background: #444;
+      display: block;
+      margin: 20px auto;
+      border: 2px solid white;
+    }
+  </style>
 </head>
-
 <body>
 
-<h1>DK RESELLS</h1>
-
-<!-- 🔊 LYD -->
-<audio id="clickSound" src="click.mp3"></audio>
-
-<div id="login" class="box">
-    <p>Indtast kode</p>
-    <input type="password" id="kode" onkeydown="enter(event)">
-    <br>
-    <button onclick="login()">Login</button>
-    <div class="status" id="status"></div>
+<div id="login">
+  <h1>Login</h1>
+  <p>Indtast kode:</p>
+  <input type="password" id="codeInput">
+  <button onclick="checkCode()">Log ind</button>
+  <p id="error"></p>
 </div>
 
-<div id="menu" class="box">
-    <h2>Vælg side</h2>
-
-    <button class="link" onmouseover="klik()" onclick="klik(); go('https://www.temu.com/')">Temu</button>
-    <button class="link" onmouseover="klik()" onclick="klik(); go('https://www.vinted.com/')">Vinted</button>
-    <button class="link" onmouseover="klik()" onclick="klik(); go('https://www.repdanes.dk/forside')">RepDanes</button>
-    <button class="link" onmouseover="klik()" onclick="klik(); go('https://www.acbuy.com/product?id=970916386889&u=XNX5L3&source=AL')">Hoodie Supplier</button>
-    <button class="link" onmouseover="klik()" onclick="klik(); go('https://www.acbuy.com/product?id=922835150765&u=FIL339TES&source=AL')">Cap Supplier</button>
-    <button class="link" onmouseover="klik()" onclick="klik(); go('https://www.acbuy.com/product?id=837637789856&u=XNX5L3&source=AL')">T-Shirt Supplier</button>
-
+<div id="game">
+  <h1>Crosser Spil 🏍️</h1>
+  <canvas id="canvas" width="800" height="400"></canvas>
+  <p>Brug piletaster ↑ ↓ → ←</p>
 </div>
 
 <script>
-function klik(){
-    document.getElementById("clickSound").currentTime = 0;
-    document.getElementById("clickSound").play();
+function checkCode() {
+  const code = document.getElementById("codeInput").value;
+  if (code === "8765") {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    startGame();
+  } else {
+    document.getElementById("error").innerText = "Forkert kode!";
+  }
 }
 
-function enter(e){
-    if(e.key === "Enter") login();
-}
+function startGame() {
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
 
-function login(){
-    const kode = "1339"; // skift kode her
-    const input = document.getElementById("kode").value;
-    const status = document.getElementById("status");
+  let bike = {
+    x: 100,
+    y: 300,
+    width: 50,
+    height: 30,
+    speed: 0
+  };
 
-    klik();
+  let gravity = 0.5;
+  let velocityY = 0;
+  let jumping = false;
 
-    if(input === kode){
-        status.innerText = "Adgang godkendt";
-        status.style.color = "lightgreen";
+  function drawBike() {
+    ctx.fillStyle = "lime";
+    ctx.fillRect(bike.x, bike.y, bike.width, bike.height);
+  }
 
-        setTimeout(()=>{
-            document.getElementById("login").style.display = "none";
-            document.getElementById("menu").style.display = "block";
-        },500);
+  function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    } else {
-        status.innerText = "Forkert kode";
-        status.style.color = "red";
+    // tyngdekraft
+    velocityY += gravity;
+    bike.y += velocityY;
+
+    // jord
+    if (bike.y > 300) {
+      bike.y = 300;
+      velocityY = 0;
+      jumping = false;
     }
-}
 
-function go(url){
-    window.location.href = url;
+    drawBike();
+    requestAnimationFrame(update);
+  }
+
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "ArrowRight") {
+      bike.x += 10;
+    }
+    if (e.key === "ArrowLeft") {
+      bike.x -= 10;
+    }
+    if (e.key === "ArrowUp" && !jumping) {
+      velocityY = -10;
+      jumping = true;
+    }
+  });
+
+  update();
 }
 </script>
 
