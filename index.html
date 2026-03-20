@@ -1,178 +1,69 @@
-<!DOCTYPE html>
-<html lang="da">
-<head>
-<meta charset="UTF-8">
-<title>Crosser Ultimate</title>
-<style>
-body { margin:0; overflow:hidden; background:#111; }
-canvas { display:block; margin:auto; background:#1b1b1b; }
-#ui { position:absolute; top:10px; left:10px; color:white; font-family:Arial; }
-#startScreen {
- position:absolute; top:0; left:0; width:100%; height:100%;
- display:flex; align-items:center; justify-content:center;
- background:rgba(0,0,0,0.85); color:white; flex-direction:column;
- font-family:Arial;
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+export default function HomePage() {
+  const [dark, setDark] = useState(true);
+
+  return (
+    <div className={dark ? "bg-black text-white min-h-screen" : "bg-white text-black min-h-screen"}>
+      {/* Navbar */}
+      <div className="flex justify-between items-center p-6">
+        <h1 className="text-2xl font-bold">🚀 Mit GitHub Site</h1>
+        <Button onClick={() => setDark(!dark)}>
+          Skift tema
+        </Button>
+      </div>
+
+      {/* Hero Section */}
+      <div className="flex flex-col items-center text-center mt-20 px-4">
+        <motion.h2
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-5xl font-extrabold mb-6"
+        >
+          Velkommen til min
+          <span className="text-purple-500"> MEGA FEDE </span>
+          hjemmeside 😎
+        </motion.h2>
+
+        <p className="text-lg max-w-xl opacity-80">
+          Dette er min personlige GitHub side hvor jeg viser projekter,
+          skills og alt det fede jeg bygger.
+        </p>
+
+        <Button className="mt-6 text-lg px-6 py-3">
+          Se mine projekter
+        </Button>
+      </div>
+
+      {/* Projects */}
+      <div className="grid md:grid-cols-3 gap-6 p-10 mt-20">
+        {[1, 2, 3].map((item) => (
+          <motion.div
+            key={item}
+            whileHover={{ scale: 1.05 }}
+          >
+            <Card className="rounded-2xl shadow-xl">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold mb-2">Projekt {item}</h3>
+                <p className="opacity-70">
+                  Et mega fedt projekt jeg har lavet 🚀
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div className="text-center p-6 opacity-60">
+        © 2026 - Lavet af mig 💻
+      </div>
+    </div>
+  );
 }
-button { padding:12px 25px; font-size:18px; cursor:pointer; }
-</style>
-</head>
-<body>
-
-<div id="ui">
-<div>Score: <span id="score">0</span></div>
-<div>Level: <span id="level">1</span></div>
-<div>Highscore: <span id="highscore">0</span></div>
-</div>
-
-<div id="startScreen">
-<h1>🐸 Crosser Ultimate</h1>
-<button onclick="startGame()">Start</button>
-</div>
-
-<canvas id="gameCanvas" width="400" height="600"></canvas>
-
-<script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
-let player, cars, logs, score, level, speed, gameRunning;
-let highscore = localStorage.getItem("highscore") || 0;
-document.getElementById("highscore").innerText = highscore;
-
-function init(){
- player = { x:180, y:540, size:20 };
- cars = [];
- logs = [];
- score = 0;
- level = 1;
- speed = 2;
- gameRunning = true;
-}
-
-function startGame(){
- document.getElementById("startScreen").style.display="none";
- init();
- update();
-}
-
-function spawnCar(){
- const row = Math.floor(Math.random()*5)+5;
- const y = row*60;
- const dir = Math.random()>0.5?1:-1;
- cars.push({ x: dir===1?-60:460, y, w:50, h:30, dir });
-}
-
-function spawnLog(){
- const row = Math.floor(Math.random()*5);
- const y = row*60;
- const dir = Math.random()>0.5?1:-1;
- logs.push({ x: dir===1?-60:460, y, w:80, h:30, dir });
-}
-
-function drawGrid(){
- for(let i=0;i<10;i++){
-   ctx.fillStyle = i<5 ? "#0a3" : "#444"; // water + road
-   ctx.fillRect(0,i*60,400,60);
- }
-}
-
-function drawPlayer(){
- ctx.fillStyle="lime";
- ctx.fillRect(player.x,player.y,player.size,player.size);
-}
-
-function drawCars(){
- ctx.fillStyle="red";
- cars.forEach(c=>{
-   c.x += speed*c.dir;
-   ctx.fillRect(c.x,c.y,c.w,c.h);
-
-   if(collision(player,c)) gameOver();
- });
-}
-
-function drawLogs(){
- ctx.fillStyle="brown";
- let onLog=false;
- logs.forEach(l=>{
-   l.x += (speed-1)*l.dir;
-   ctx.fillRect(l.x,l.y,l.w,l.h);
-
-   if(collision(player,l)){
-     player.x += (speed-1)*l.dir;
-     onLog=true;
-   }
- });
-
- if(player.y < 300 && !onLog){
-   gameOver(); // water death
- }
-}
-
-function collision(a,b){
- return a.x < b.x+b.w &&
-        a.x+a.size > b.x &&
-        a.y < b.y+b.h &&
-        a.y+a.size > b.y;
-}
-
-function gameOver(){
- gameRunning=false;
- if(score>highscore) localStorage.setItem("highscore",score);
- alert("Game Over! Score: "+score);
- location.reload();
-}
-
-function update(){
- if(!gameRunning) return;
- ctx.clearRect(0,0,400,600);
-
- drawGrid();
- drawLogs();
- drawCars();
- drawPlayer();
-
- cars = cars.filter(c=>c.x>-80 && c.x<480);
- logs = logs.filter(l=>l.x>-80 && l.x<480);
-
- // win
- if(player.y <= 0){
-   score++;
-   level++;
-   speed += 0.4;
-   player.y = 540;
- }
-
- // BOUNDARIES (fix: cannot go off screen)
- player.x = Math.max(0, Math.min(380, player.x));
- player.y = Math.max(0, Math.min(580, player.y));
-
- document.getElementById("score").innerText=score;
- document.getElementById("level").innerText=level;
-
- requestAnimationFrame(update);
-}
-
-// controls
-window.addEventListener("keydown",e=>{
- if(!gameRunning) return;
- if(e.key==="ArrowUp") player.y-=60;
- if(e.key==="ArrowDown") player.y+=60;
- if(e.key==="ArrowLeft") player.x-=40;
- if(e.key==="ArrowRight") player.x+=40;
-});
-
-// mobile
-canvas.addEventListener("touchstart",e=>{
- const x=e.touches[0].clientX;
- if(x<window.innerWidth/2) player.x-=40;
- else player.x+=40;
- player.y-=60;
-});
-
-setInterval(spawnCar,1200);
-setInterval(spawnLog,1500);
-</script>
 
 </body>
 </html>
