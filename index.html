@@ -2,22 +2,25 @@ import React, { useEffect, useRef, useState } from "react";
 
 export default function BeachCrosserGame() {
   const canvasRef = useRef(null);
+  const [gameState, setGameState] = useState("menu");
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
 
   useEffect(() => {
+    if (gameState !== "playing") return;
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    let bike = { x: 80, y: 200, vy: 0, width: 30, height: 15 };
+    let bike = { x: 80, y: 200, vy: 0, width: 40, height: 20, tilt: 0 };
     let gravity = 0.6;
-    let speed = 4;
+    let speed = 5;
     let obstacles = [];
     let keys = {};
     let gameScore = 0;
 
     function spawnObstacle() {
-      obstacles.push({ x: canvas.width, y: 210, w: 25, h: 25 });
+      obstacles.push({ x: canvas.width, y: 210, w: 30, h: 30 });
     }
 
     function drawBackground() {
@@ -32,8 +35,21 @@ export default function BeachCrosserGame() {
     }
 
     function drawBike() {
+      ctx.save();
+      ctx.translate(bike.x, bike.y);
+      ctx.rotate(bike.tilt);
+
+      // body
       ctx.fillStyle = "black";
-      ctx.fillRect(bike.x, bike.y, bike.width, bike.height);
+      ctx.fillRect(0, 0, bike.width, bike.height);
+
+      // wheels
+      ctx.beginPath();
+      ctx.arc(5, 20, 5, 0, Math.PI * 2);
+      ctx.arc(30, 20, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
     }
 
     function update() {
@@ -42,20 +58,25 @@ export default function BeachCrosserGame() {
 
       // hop
       if (keys[" "] && bike.y >= 200) {
-        bike.vy = -10;
+        bike.vy = -12;
       }
 
-      // fysik
+      // wheelie
+      if (keys["Shift"]) {
+        bike.tilt = -0.5;
+      } else {
+        bike.tilt *= 0.9;
+      }
+
       bike.vy += gravity;
       bike.y += bike.vy;
 
-      // hold på vejen (IKKE falde igennem)
       if (bike.y >= 200) {
         bike.y = 200;
         bike.vy = 0;
       }
 
-      // begræns til venstre/højre
+      // bounds
       if (bike.x < 0) bike.x = 0;
       if (bike.x > canvas.width - bike.width) {
         bike.x = canvas.width - bike.width;
@@ -67,15 +88,14 @@ export default function BeachCrosserGame() {
         ctx.fillStyle = "red";
         ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
 
-        // collision
         if (
           bike.x < obs.x + obs.w &&
           bike.x + bike.width > obs.x &&
           bike.y < obs.y + obs.h &&
           bike.y + bike.height > obs.y
         ) {
-          gameScore = 0;
-          obstacles = [];
+          setGameState("gameover");
+          if (gameScore > highScore) setHighScore(gameScore);
         }
       });
 
@@ -85,12 +105,11 @@ export default function BeachCrosserGame() {
 
       gameScore++;
       setScore(gameScore);
-      if (gameScore > highScore) setHighScore(gameScore);
 
       requestAnimationFrame(update);
     }
 
-    let obstacleInterval = setInterval(spawnObstacle, 1500);
+    let obstacleInterval = setInterval(spawnObstacle, 1200);
 
     window.addEventListener("keydown", (e) => (keys[e.key] = true));
     window.addEventListener("keyup", (e) => (keys[e.key] = false));
@@ -98,19 +117,59 @@ export default function BeachCrosserGame() {
     update();
 
     return () => clearInterval(obstacleInterval);
-  }, [highScore]);
+  }, [gameState, highScore]);
 
+  // MENU
+  if (gameState === "menu") {
+    return (
+      <div style={{ textAlign: "center", padding: 40 }}>
+        <h1 style={{ fontSize: 40 }}>🏍️ BEACH CROSSER</h1>
+        <p>Mega fed crosser spil på stranden 🌊</p>
+        <button
+          onClick={() => {
+            setScore(0);
+            setGameState("playing");
+          }}
+          style={{ padding: 15, fontSize: 20, marginTop: 20 }}
+        >
+          ▶ Start Spil
+        </button>
+        <p style={{ marginTop: 20 }}>Highscore: {highScore}</p>
+      </div>
+    );
+  }
+
+  // GAME OVER
+  if (gameState === "gameover") {
+    return (
+      <div style={{ textAlign: "center", padding: 40 }}>
+        <h1>💥 GAME OVER</h1>
+        <p>Score: {score}</p>
+        <p>Highscore: {highScore}</p>
+        <button
+          onClick={() => {
+            setScore(0);
+            setGameState("playing");
+          }}
+          style={{ padding: 15, fontSize: 20 }}
+        >
+          🔄 Prøv igen
+        </button>
+      </div>
+    );
+  }
+
+  // GAME
   return (
     <div style={{ textAlign: "center" }}>
-      <h1>🏍️ Beach Crosser</h1>
-      <p>Score: {score} | High Score: {highScore}</p>
+      <h2>Score: {score}</h2>
       <canvas
         ref={canvasRef}
-        width={600}
+        width={700}
         height={300}
-        style={{ border: "2px solid black", borderRadius: "10px" }}
+        style={{ border: "3px solid black", borderRadius: 10 }}
       />
-      <p>SPACE = hop</p>
+      <p>SPACE = hop | SHIFT = stejle 🤘</p>
     </div>
   );
 }
