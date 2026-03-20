@@ -3,95 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>DK Resells</title>
-<link rel="icon" type="image/png" href="logo.png">
+<link rel="icon" href="logo.png">
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: radial-gradient(circle at top, #0f172a, #020617);
-  color: white;
+body{
+  margin:0;
+  font-family:Arial;
+  background: radial-gradient(circle at top, #020617, #000000);
+  color:white;
+  overflow-x:hidden;
 }
 
-.center {
-  text-align: center;
-  padding: 60px;
+h1,h2{
+  text-align:center;
+  text-shadow:0 0 20px cyan;
 }
 
-.cards {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
+.center{padding:80px 20px;text-align:center}
+
+.cards{display:flex;justify-content:center;gap:25px;margin-top:50px}
+
+.card{
+  background:rgba(255,255,255,0.05);
+  padding:40px;
+  border-radius:20px;
+  cursor:pointer;
+  backdrop-filter:blur(10px);
+  transition:0.3s;
 }
 
-.card {
-  background: rgba(255,255,255,0.05);
-  padding: 30px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: 0.3s;
+.card:hover{
+  transform:scale(1.1);
+  box-shadow:0 0 40px cyan;
 }
 
-.card:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 20px cyan;
+.page{display:none;padding:20px}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:20px;
 }
 
-.page {
-  display: none;
-  padding: 20px;
+.item{
+  background:rgba(255,255,255,0.05);
+  padding:10px;
+  border-radius:15px;
+  text-align:center;
+  transition:0.3s;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 15px;
+.item:hover{
+  transform:scale(1.08);
+  box-shadow:0 0 20px cyan;
 }
 
-.item {
-  background: rgba(255,255,255,0.05);
-  padding: 10px;
-  border-radius: 15px;
-  text-align: center;
+.item img{
+  width:100%;
+  border-radius:10px;
+  cursor:pointer;
 }
 
-.item img {
-  width: 100%;
-  border-radius: 10px;
-  cursor: pointer;
+button{
+  padding:12px 20px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  margin-top:10px;
+  font-weight:bold;
 }
 
-button {
-  padding: 10px 20px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  margin-top: 10px;
+.primary{
+  background:cyan;
+  color:black;
+  box-shadow:0 0 15px cyan;
 }
 
-.back {
-  cursor: pointer;
-  margin-bottom: 20px;
-  color: cyan;
+.primary:hover{
+  transform:scale(1.05);
 }
 
-.cartBtn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 15px;
-  border-radius: 50%;
+.back{
+  cursor:pointer;
+  color:cyan;
+  margin-bottom:20px;
 }
+
+.cartBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:18px;
+  border-radius:50%;
+  font-size:20px;
+  background:cyan;
+  color:black;
+  box-shadow:0 0 20px cyan;
+}
+
+.fade{animation:fadeIn 0.5s}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
 </style>
 </head>
-
 <body>
 
-<!-- FORSIDE -->
-<div id="home" class="center">
-  <img src="logo.png" style="width:100px;">
+<!-- HOME -->
+<div id="home" class="center fade">
+  <img src="logo.png" width="100">
   <h1>DK Resells</h1>
 
   <div class="cards">
@@ -104,80 +128,60 @@ button {
 <!-- HOODIES -->
 <div id="hoodiesPage" class="page">
   <div class="back" onclick="goHome()">⬅ Tilbage</div>
-  <h2>🧥 Hoodies</h2>
-
-  <div class="grid" id="grid"></div>
+  <h2>Hoodies</h2>
+  <div id="grid" class="grid"></div>
 </div>
 
-<!-- PRODUKT -->
-<div id="productPage" class="page">
+<!-- PRODUCT -->
+<div id="productPage" class="page center">
   <div class="back" onclick="showHoodies()">⬅ Tilbage</div>
 
-  <img id="productImg" style="width:200px;">
+  <img id="productImg" width="250">
   <h2 id="productPrice"></h2>
 
-  <button onclick="addToCart()">Tilføj til kurv</button>
+  <button class="primary" onclick="addToCart()">Tilføj til kurv</button>
 </div>
 
-<!-- KURV -->
+<!-- CART -->
 <div id="cartPage" class="page">
   <div class="back" onclick="goHome()">⬅ Tilbage</div>
 
   <h2>🛒 Kurv</h2>
   <div id="cartItems"></div>
 
-  <button onclick="checkout()">Færdiggør køb</button>
+  <h3 id="total"></h3>
+
+  <button onclick="clearCart()">Tøm kurv</button>
+  <button class="primary" onclick="checkout()">Checkout</button>
 </div>
 
 <button class="cartBtn" onclick="openCart()">🛒</button>
 
 <script>
-const hoodies = [
-  "hoodie_1.png",
-  "hoodie_2.png",
-  "hoodie_3.png",
-  "hoodie_4.png",
-  "hoodie_5.png",
-  "hoodie_6.png",
-  "hoodie_7.png",
-  "hoodie_8.png"
-];
+const hoodies=["hoodie_1.png","hoodie_2.png","hoodie_3.png","hoodie_4.png"];
 
-let cart = [];
-let currentProduct = null;
-let userEmail = localStorage.getItem("email") || null;
+let cart=[];
+let currentProduct=null;
+let userEmail=localStorage.getItem("email")||null;
 
-function randomPrice() {
-  return Math.floor(Math.random() * 1200) + 300;
-}
+function randomPrice(){return Math.floor(Math.random()*1000)+300}
 
-function hideAll() {
-  document.getElementById("home").style.display = "none";
-  document.getElementById("hoodiesPage").style.display = "none";
-  document.getElementById("productPage").style.display = "none";
-  document.getElementById("cartPage").style.display = "none";
-}
+function hideAll(){home.style.display="none";hoodiesPage.style.display="none";productPage.style.display="none";cartPage.style.display="none"}
+function goHome(){hideAll();home.style.display="block"}
 
-function goHome() {
+function showHoodies(){
   hideAll();
-  document.getElementById("home").style.display = "block";
-}
+  hoodiesPage.style.display="block";
+  grid.innerHTML="";
 
-function showHoodies() {
-  hideAll();
-  document.getElementById("hoodiesPage").style.display = "block";
+  hoodies.forEach(img=>{
+    const price=randomPrice();
 
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
+    const div=document.createElement("div");
+    div.className="item fade";
 
-  hoodies.forEach(img => {
-    const price = randomPrice();
-
-    const div = document.createElement("div");
-    div.className = "item";
-
-    div.innerHTML = `
-      <img src="${img}" onclick="openProduct('${img}', ${price})">
+    div.innerHTML=`
+      <img src="${img}" onclick="openProduct('${img}',${price})">
       <p>${price} DKK</p>
     `;
 
@@ -185,63 +189,57 @@ function showHoodies() {
   });
 }
 
-function openProduct(img, price) {
-  currentProduct = { img, price };
-
+function openProduct(img,price){
+  currentProduct={img,price};
   hideAll();
-  document.getElementById("productPage").style.display = "block";
-
-  document.getElementById("productImg").src = img;
-  document.getElementById("productPrice").innerText = price + " DKK";
+  productPage.style.display="block";
+  productImg.src=img;
+  productPrice.innerText=price+" DKK";
 }
 
-function addToCart() {
-  if (!currentProduct) {
-    alert("Vælg et produkt først!");
-    return;
-  }
+function addToCart(){
+  if(!currentProduct)return alert("Vælg produkt");
 
-  if (!userEmail) {
-    userEmail = prompt("Indtast din email:");
-    if (!userEmail) return;
-    localStorage.setItem("email", userEmail);
+  if(!userEmail){
+    userEmail=prompt("Indtast din email");
+    if(!userEmail)return;
+    localStorage.setItem("email",userEmail);
   }
 
   cart.push(currentProduct);
   alert("Tilføjet til kurv 🔥");
 }
 
-function openCart() {
-  hideAll();
-  document.getElementById("cartPage").style.display = "block";
+function openCart(){hideAll();cartPage.style.display="block";renderCart()}
 
-  const list = document.getElementById("cartItems");
-  list.innerHTML = "";
+function renderCart(){
+  cartItems.innerHTML="";
+  let total=0;
 
-  if (cart.length === 0) {
-    list.innerHTML = "<p>Kurven er tom</p>";
-    return;
-  }
+  cart.forEach((item,i)=>{
+    total+=item.price;
 
-  cart.forEach(item => {
-    list.innerHTML += `<p>Hoodie - ${item.price} DKK</p>`;
+    cartItems.innerHTML+=`
+      <div class="item">
+        <p>${item.price} DKK</p>
+        <button onclick="removeItem(${i})">Fjern</button>
+      </div>
+    `;
   });
+
+  total.innerText="Total: "+total+" DKK";
 }
 
-function checkout() {
-  if (cart.length === 0) {
-    alert("Kurven er tom!");
-    return;
-  }
+function removeItem(i){cart.splice(i,1);renderCart()}
+function clearCart(){cart=[];renderCart()}
 
-  let text = "Ny ordre fra: " + userEmail + "\\n\\n";
+function checkout(){
+  if(cart.length===0)return alert("Kurv tom");
 
-  cart.forEach(item => {
-    text += "- Hoodie " + item.price + " DKK\\n";
-  });
+  let text="Ordre fra: "+userEmail+"\n\n";
+  cart.forEach(i=>text+="- "+i.price+" DKK\n");
 
-  window.location.href =
-    `mailto:dinemail@gmail.com?subject=Ny ordre&body=${encodeURIComponent(text)}`;
+  window.location.href=`mailto:dinemail@gmail.com?subject=Order&body=${encodeURIComponent(text)}`;
 }
 </script>
 
