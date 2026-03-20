@@ -2,14 +2,20 @@
 <html lang="da">
 <head>
 <meta charset="UTF-8">
-<title>Crosser Game</title>
+<title>Crosser Game Deluxe</title>
 <style>
-  body { margin:0; overflow:hidden; }
-  canvas { display:block; background: linear-gradient(#87CEEB, #f4a460); }
+  body { margin:0; overflow:hidden; font-family:sans-serif; }
+  canvas { display:block; }
+  #ui {
+    position:fixed; top:10px; left:10px; color:white;
+    background:rgba(0,0,0,0.4); padding:10px; border-radius:10px;
+  }
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
+<div id="ui">Speed: <span id="speed">0</span></div>
+
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -18,6 +24,7 @@ canvas.height = window.innerHeight;
 
 let speed = 0;
 let wheelie = false;
+let score = 0;
 
 const player = {
   x: canvas.width/2,
@@ -27,10 +34,51 @@ const player = {
   angle: 0
 };
 
-const keys = {};
+const cars = [];
 
+const keys = {};
 document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
 document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+function spawnCar() {
+  cars.push({
+    x: canvas.width/2 + (Math.random()*120 - 60),
+    y: -100,
+    width: 40,
+    height: 80,
+    speed: 5 + Math.random()*3
+  });
+}
+
+setInterval(spawnCar, 1500);
+
+function drawBackground() {
+  // Sky
+  let grad = ctx.createLinearGradient(0,0,0,canvas.height);
+  grad.addColorStop(0, "#87CEEB");
+  grad.addColorStop(1, "#FFDAB9");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // Ocean
+  ctx.fillStyle = "#1e90ff";
+  ctx.fillRect(0, canvas.height/2 + 50, canvas.width, 200);
+
+  // Sand
+  ctx.fillStyle = "#f4a460";
+  ctx.fillRect(0, canvas.height/2, canvas.width, 100);
+
+  // Palm trees
+  for (let i=0;i<5;i++) {
+    let x = i*300 + 50;
+    ctx.fillStyle = "brown";
+    ctx.fillRect(x, canvas.height/2 - 80, 10, 80);
+    ctx.fillStyle = "green";
+    ctx.beginPath();
+    ctx.arc(x+5, canvas.height/2 - 90, 30, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
 
 function drawRoad() {
   ctx.fillStyle = "#333";
@@ -46,14 +94,6 @@ function drawRoad() {
   }
 }
 
-function drawBeach() {
-  ctx.fillStyle = "#f4a460";
-  ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
-
-  ctx.fillStyle = "#1e90ff";
-  ctx.fillRect(0, canvas.height/2 + 100, canvas.width, 200);
-}
-
 function drawPlayer() {
   ctx.save();
   ctx.translate(player.x, player.y);
@@ -65,29 +105,72 @@ function drawPlayer() {
   ctx.restore();
 }
 
+function drawCars() {
+  ctx.fillStyle = "black";
+  cars.forEach(car => {
+    ctx.fillRect(car.x - car.width/2, car.y, car.width, car.height);
+  });
+}
+
+function updateCars() {
+  cars.forEach(car => {
+    car.y += car.speed + speed;
+
+    // Collision
+    if (
+      car.x < player.x + player.width/2 &&
+      car.x + car.width > player.x - player.width/2 &&
+      car.y < player.y + player.height/2 &&
+      car.y + car.height > player.y - player.height/2
+    ) {
+      alert("Game Over! Score: " + score);
+      location.reload();
+    }
+  });
+}
+
 function update() {
-  if (keys["w"]) {
-    speed += 0.2;
-  } else {
-    speed *= 0.98;
-  }
+  if (keys["w"]) speed += 0.2;
+  else speed *= 0.98;
+
+  if (keys["a"]) player.x -= 5;
+  if (keys["d"]) player.x += 5;
 
   if (keys["shift"]) {
     wheelie = true;
-    player.angle = -0.5;
+    player.angle = -0.6;
   } else {
     wheelie = false;
     player.angle = 0;
   }
+
+  score += Math.floor(speed);
+  document.getElementById("speed").innerText = Math.floor(speed);
+}
+
+// Simple engine sound
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let oscillator = audioCtx.createOscillator();
+oscillator.type = "sawtooth";
+oscillator.frequency.value = 0;
+oscillator.connect(audioCtx.destination);
+oscillator.start();
+
+function updateSound() {
+  oscillator.frequency.value = 50 + speed * 20;
 }
 
 function gameLoop() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  drawBeach();
+  drawBackground();
   drawRoad();
   drawPlayer();
+  drawCars();
+
   update();
+  updateCars();
+  updateSound();
 
   requestAnimationFrame(gameLoop);
 }
