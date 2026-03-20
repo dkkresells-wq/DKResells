@@ -3,25 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hoodies Shop</title>
+<title>Min Shop</title>
 
 <style>
 body {
   background: black;
   color: white;
   font-family: Arial;
+  margin: 0;
 }
 
-h1 {
+/* Forside */
+.home {
   text-align: center;
-  margin: 30px;
+  padding: 50px;
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.card {
+  background: #111;
+  padding: 30px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.1);
+}
+
+/* Hoodies side */
+#hoodiesPage {
+  display: none;
+  padding: 20px;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
-  padding: 20px;
+  gap: 15px;
 }
 
 .item {
@@ -29,64 +55,80 @@ h1 {
   padding: 10px;
   border-radius: 10px;
   text-align: center;
-  transition: 0.3s;
 }
 
-.item:hover {
-  transform: scale(1.05);
-}
-
-.img {
+.item img {
   width: 100%;
-  height: 120px;
-  background-image: url('Hoodie.png'); /* dit billede */
-  background-size: 1000% 1000%;
   border-radius: 10px;
 }
 
-.price {
-  margin-top: 8px;
-  font-size: 14px;
+.back {
+  margin-bottom: 20px;
+  cursor: pointer;
+  display: inline-block;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🧥 Hoodies</h1>
+<!-- FORSIDE -->
+<div class="home" id="home">
+  <h1>🔥 Min Shop</h1>
 
-<div class="grid" id="grid"></div>
+  <div class="cards">
+    <div class="card" onclick="showHoodies()">🧥 Hoodies</div>
+    <div class="card">🧢 Caps (kommer snart)</div>
+    <div class="card">👕 T-Shirts (kommer snart)</div>
+  </div>
+</div>
+
+<!-- HOODIES SIDE -->
+<div id="hoodiesPage">
+  <div class="back" onclick="goHome()">⬅ Tilbage</div>
+  <h2>🧥 Hoodies</h2>
+
+  <div class="grid" id="grid"></div>
+</div>
 
 <script>
-const grid = document.getElementById("grid");
+// 🔥 HER SKAL DU INDSÆTTE DINE BILLEDER
+const hoodies = [
+  "Hoodie.Png",
+  "hoodie2.jpg",
+  "hoodie3.jpg",
+  "hoodie4.jpg",
+  "hoodie5.jpg"
+  // tilføj ALLE dine billeder her
+];
 
 function randomPrice() {
   return Math.floor(Math.random() * 1200) + 300;
 }
 
-// hvor mange "felter" vi deler billedet i
-const cols = 10;
-const rows = 10;
+function showHoodies() {
+  document.getElementById("home").style.display = "none";
+  document.getElementById("hoodiesPage").style.display = "block";
 
-for (let y = 0; y < rows; y++) {
-  for (let x = 0; x < cols; x++) {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
 
-    const item = document.createElement("div");
-    item.className = "item";
+  hoodies.forEach(img => {
+    const div = document.createElement("div");
+    div.className = "item";
 
-    const img = document.createElement("div");
-    img.className = "img";
+    div.innerHTML = `
+      <img src="${img}">
+      <p>${randomPrice()} DKK</p>
+    `;
 
-    img.style.backgroundPosition = `${(x/(cols-1))*100}% ${(y/(rows-1))*100}%`;
+    grid.appendChild(div);
+  });
+}
 
-    const price = document.createElement("div");
-    price.className = "price";
-    price.innerText = randomPrice() + " DKK";
-
-    item.appendChild(img);
-    item.appendChild(price);
-    grid.appendChild(item);
-  }
+function goHome() {
+  document.getElementById("home").style.display = "block";
+  document.getElementById("hoodiesPage").style.display = "none";
 }
 </script>
 
