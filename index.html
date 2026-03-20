@@ -3,58 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Min Shop</title>
+<title>HighTech Shop</title>
 
 <style>
 body {
-  background: black;
-  color: white;
-  font-family: Arial;
   margin: 0;
+  font-family: Arial;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: white;
 }
 
-/* Forside */
-.home {
+/* Center */
+.center {
   text-align: center;
-  padding: 50px;
+  padding: 80px 20px;
 }
 
+/* Cards */
 .cards {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  margin-top: 40px;
+  gap: 30px;
+  margin-top: 50px;
 }
 
 .card {
-  background: #111;
-  padding: 30px;
-  border-radius: 15px;
+  background: rgba(255,255,255,0.05);
+  padding: 40px;
+  border-radius: 20px;
   cursor: pointer;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
   transition: 0.3s;
 }
 
 .card:hover {
   transform: scale(1.1);
+  box-shadow: 0 0 30px rgba(0,255,255,0.6);
 }
 
-/* Hoodies side */
+/* Hoodies page */
 #hoodiesPage {
   display: none;
   padding: 20px;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 15px;
+.back {
+  cursor: pointer;
+  margin-bottom: 20px;
+  color: cyan;
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+}
+
+/* Hoodie item */
 .item {
-  background: #111;
+  background: rgba(255,255,255,0.05);
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 15px;
   text-align: center;
+  transition: 0.3s;
+}
+
+.item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px cyan;
 }
 
 .item img {
@@ -62,10 +79,10 @@ body {
   border-radius: 10px;
 }
 
-.back {
-  margin-bottom: 20px;
-  cursor: pointer;
-  display: inline-block;
+/* Glow title */
+h1 {
+  font-size: 50px;
+  text-shadow: 0 0 20px cyan;
 }
 </style>
 </head>
@@ -73,17 +90,17 @@ body {
 <body>
 
 <!-- FORSIDE -->
-<div class="home" id="home">
-  <h1>🔥 Min Shop</h1>
+<div id="home" class="center">
+  <h1>⚡ HighTech Shop</h1>
 
   <div class="cards">
     <div class="card" onclick="showHoodies()">🧥 Hoodies</div>
-    <div class="card">🧢 Caps (kommer snart)</div>
-    <div class="card">👕 T-Shirts (kommer snart)</div>
+    <div class="card">🧢 Caps</div>
+    <div class="card">👕 T-Shirts</div>
   </div>
 </div>
 
-<!-- HOODIES SIDE -->
+<!-- HOODIES -->
 <div id="hoodiesPage">
   <div class="back" onclick="goHome()">⬅ Tilbage</div>
   <h2>🧥 Hoodies</h2>
@@ -92,15 +109,8 @@ body {
 </div>
 
 <script>
-// 🔥 HER SKAL DU INDSÆTTE DINE BILLEDER
-const hoodies = [
-  "HoodieRyg.png",
-  "hoodie2.jpg",
-  "hoodie3.jpg",
-  "hoodie4.jpg",
-  "hoodie5.jpg"
-  // tilføj ALLE dine billeder her
-];
+// 🔥 DIN FIL
+const hoodieImage = "HoodieRyg.png";
 
 function randomPrice() {
   return Math.floor(Math.random() * 1200) + 300;
@@ -113,17 +123,18 @@ function showHoodies() {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
 
-  hoodies.forEach(img => {
+  // laver mange hoodies ud fra dit ene billede
+  for (let i = 0; i < 20; i++) {
     const div = document.createElement("div");
     div.className = "item";
 
     div.innerHTML = `
-      <img src="${img}">
+      <img src="${hoodieImage}">
       <p>${randomPrice()} DKK</p>
     `;
 
     grid.appendChild(div);
-  });
+  }
 }
 
 function goHome() {
