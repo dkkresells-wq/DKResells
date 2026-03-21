@@ -1,246 +1,120 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DK Resells</title>
-<link rel="icon" href="logo.png">
-
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background: radial-gradient(circle at top, #020617, #000000);
-  color:white;
-  overflow-x:hidden;
-}
-
-h1,h2{
-  text-align:center;
-  text-shadow:0 0 20px cyan;
-}
-
-.center{padding:80px 20px;text-align:center}
-
-.cards{display:flex;justify-content:center;gap:25px;margin-top:50px}
-
-.card{
-  background:rgba(255,255,255,0.05);
-  padding:40px;
-  border-radius:20px;
-  cursor:pointer;
-  backdrop-filter:blur(10px);
-  transition:0.3s;
-}
-
-.card:hover{
-  transform:scale(1.1);
-  box-shadow:0 0 40px cyan;
-}
-
-.page{display:none;padding:20px}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:20px;
-}
-
-.item{
-  background:rgba(255,255,255,0.05);
-  padding:10px;
-  border-radius:15px;
-  text-align:center;
-  transition:0.3s;
-}
-
-.item:hover{
-  transform:scale(1.08);
-  box-shadow:0 0 20px cyan;
-}
-
-.item img{
-  width:100%;
-  border-radius:10px;
-  cursor:pointer;
-}
-
-button{
-  padding:12px 20px;
-  border-radius:12px;
-  border:none;
-  cursor:pointer;
-  margin-top:10px;
-  font-weight:bold;
-}
-
-.primary{
-  background:cyan;
-  color:black;
-  box-shadow:0 0 15px cyan;
-}
-
-.primary:hover{
-  transform:scale(1.05);
-}
-
-.back{
-  cursor:pointer;
-  color:cyan;
-  margin-bottom:20px;
-}
-
-.cartBtn{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  padding:18px;
-  border-radius:50%;
-  font-size:20px;
-  background:cyan;
-  color:black;
-  box-shadow:0 0 20px cyan;
-}
-
-.fade{animation:fadeIn 0.5s}
-
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DK Resells</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: white;
+    }
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      gap: 10px;
+    }
+    input {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      width: 200px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #00ff88;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
 
-<!-- HOME -->
-<div id="home" class="center fade">
-  <img src="logo.png" width="100">
-  <h1>DK Resells</h1>
-
-  <div class="cards">
-    <div class="card" onclick="showHoodies()">🧥 Hoodies</div>
-    <div class="card">🧢 Caps</div>
-    <div class="card">👕 T-Shirts</div>
-  </div>
-</div>
-
-<!-- HOODIES -->
-<div id="hoodiesPage" class="page">
-  <div class="back" onclick="goHome()">⬅ Tilbage</div>
-  <h2>Hoodies</h2>
-  <div id="grid" class="grid"></div>
-</div>
-
-<!-- PRODUCT -->
-<div id="productPage" class="page center">
-  <div class="back" onclick="showHoodies()">⬅ Tilbage</div>
-
-  <img id="productImg" width="250">
-  <h2 id="productPrice"></h2>
-
-  <button class="primary" onclick="addToCart()">Tilføj til kurv</button>
-</div>
-
-<!-- CART -->
-<div id="cartPage" class="page">
-  <div class="back" onclick="goHome()">⬅ Tilbage</div>
-
-  <h2>🛒 Kurv</h2>
-  <div id="cartItems"></div>
-
-  <h3 id="total"></h3>
-
-  <button onclick="clearCart()">Tøm kurv</button>
-  <button class="primary" onclick="checkout()">Checkout</button>
-</div>
-
-<button class="cartBtn" onclick="openCart()">🛒</button>
+<div id="app"></div>
 
 <script>
-const hoodies=["https://cbu01.alicdn.com/img/ibank/O1CN01gP8aW11ym12i0vrz0_!!2220008526620-0-cib.jpg","hoodie_2.png","hoodie_3.png","hoodie_4.png"];
+let user = null;
 
-let cart=[];
-let currentProduct=null;
-let userEmail=localStorage.getItem("email")||null;
-
-function randomPrice(){return Math.floor(Math.random()*1000)+300}
-
-function hideAll(){home.style.display="none";hoodiesPage.style.display="none";productPage.style.display="none";cartPage.style.display="none"}
-function goHome(){hideAll();home.style.display="block"}
-
-function showHoodies(){
-  hideAll();
-  hoodiesPage.style.display="block";
-  grid.innerHTML="";
-
-  hoodies.forEach(img=>{
-    const price=randomPrice();
-
-    const div=document.createElement("div");
-    div.className="item fade";
-
-    div.innerHTML=`
-      <img src="${img}" onclick="openProduct('${img}',${price})">
-      <p>${price} DKK</p>
-    `;
-
-    grid.appendChild(div);
-  });
+function renderLogin() {
+  document.getElementById("app").innerHTML = `
+    <div class="center">
+      <h1>DK Resells 🔥</h1>
+      <input id="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+      <button onclick="signup()">Sign Up</button>
+    </div>
+  `;
 }
 
-function openProduct(img,price){
-  currentProduct={img,price};
-  hideAll();
-  productPage.style.display="block";
-  productImg.src=img;
-  productPrice.innerText=price+" DKK";
-}
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-function addToCart(){
-  if(!currentProduct)return alert("Vælg produkt");
-
-  if(!userEmail){
-    userEmail=prompt("Indtast din email");
-    if(!userEmail)return;
-    localStorage.setItem("email",userEmail);
+  if (localStorage.getItem(email) === password) {
+    user = email;
+    renderShop();
+  } else {
+    alert("Forkert login");
   }
-
-  cart.push(currentProduct);
-  alert("Tilføjet til kurv 🔥");
 }
 
-function openCart(){hideAll();cartPage.style.display="block";renderCart()}
+function signup() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-function renderCart(){
-  cartItems.innerHTML="";
-  let total=0;
-
-  cart.forEach((item,i)=>{
-    total+=item.price;
-
-    cartItems.innerHTML+=`
-      <div class="item">
-        <p>${item.price} DKK</p>
-        <button onclick="removeItem(${i})">Fjern</button>
-      </div>
-    `;
-  });
-
-  total.innerText="Total: "+total+" DKK";
+  localStorage.setItem(email, password);
+  alert("Bruger oprettet!");
 }
 
-function removeItem(i){cart.splice(i,1);renderCart()}
-function clearCart(){cart=[];renderCart()}
+function renderShop() {
+  const products = [
+    { name: "Nike Hoodie", price: 499 },
+    { name: "Jordan 4", price: 2499 },
+    { name: "Trapstar Jacket", price: 1799 }
+  ];
 
-function checkout(){
-  if(cart.length===0)return alert("Kurv tom");
-
-  let text="Ordre fra: "+userEmail+"\n\n";
-  cart.forEach(i=>text+="- "+i.price+" DKK\n");
-
-  window.location.href=`mailto:dinemail@gmail.com?subject=Order&body=${encodeURIComponent(text)}`;
+  document.getElementById("app").innerHTML = `
+    <div class="products">
+      ${products.map((p, i) => `
+        <div class="card">
+          <h2>${p.name}</h2>
+          <p>${p.price} kr</p>
+          <button onclick="buy('${p.name}', ${p.price})">Køb</button>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
+
+function buy(name, price) {
+  alert(`Køb gennemført: ${name}`);
+
+  // ⚠️ EMAIL virker ikke direkte i HTML
+  // Brug fx Formspree eller backend hvis du vil sende mails
+  console.log("Send email til dig selv med ordre:", user, name, price);
+}
+
+renderLogin();
 </script>
 
 </body>
