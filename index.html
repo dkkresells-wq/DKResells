@@ -3,43 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DK Resells 🔥</title>
+<title>DK Resells FINAL BOSS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
 body{margin:0;font-family:Inter;background:#0b0b0c;color:white}
-header{display:flex;justify-content:space-between;align-items:center;padding:20px;background:#111}
-.logo{font-weight:800}
+header{display:flex;justify-content:space-between;align-items:center;padding:15px 25px;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px)}
+.logo{font-weight:800;cursor:pointer}
 nav button{margin:0 5px;padding:8px 12px;border-radius:20px;background:#222;color:white;border:none}
 nav button.active{background:#00ff88;color:black}
-.cart{cursor:pointer}
+.banner{background:#00ff88;color:black;text-align:center;padding:8px;font-weight:700}
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;padding:20px}
-.card{background:#1a1a1a;border-radius:15px;overflow:hidden;transition:.3s}
-.card:hover{transform:scale(1.05);box-shadow:0 0 30px #00ff88}
+.card{background:#111;border-radius:15px;overflow:hidden;transition:.3s;cursor:pointer}
+.card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 0 30px #00ff88}
 .card img{width:100%;height:220px;object-fit:cover}
 .card-content{padding:15px;text-align:center}
 .price{color:#00ff88}
-button{padding:10px;border:none;border-radius:10px;background:#00ff88;cursor:pointer}
-.cart-panel{position:fixed;right:-300px;top:0;width:300px;height:100%;background:#111;padding:20px;transition:.3s}
+.stock{font-size:12px;color:#ff4444}
+button{padding:10px;border:none;border-radius:10px;background:#00ff88;color:black;cursor:pointer}
+.cart-panel{position:fixed;right:-350px;top:0;width:320px;height:100%;background:#111;padding:20px;transition:.4s}
 .cart-panel.open{right:0}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center}
+.modal-box{background:#111;padding:30px;border-radius:20px;text-align:center}
 .center{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:10px}
-input{padding:10px;border-radius:10px;border:none;width:250px;background:#222;color:white}
+input{padding:12px;border-radius:10px;border:none;width:250px;background:#222;color:white}
+.fade{animation:fade .5s}
+@keyframes fade{from{opacity:0;transform:translateY(20px)}to{opacity:1}}
 </style>
 </head>
 <body>
-
 <div id="app"></div>
+
+<div id="payModal" class="modal">
+  <div class="modal-box">
+    <h2>MobilePay</h2>
+    <p>Åbn app og swipe for at betale</p>
+    <button onclick="confirmPay()">Swipe done</button>
+  </div>
+</div>
 
 <script>
 const app=document.getElementById('app');
 let user=JSON.parse(localStorage.getItem('user'));
 let cart=JSON.parse(localStorage.getItem('cart')||'[]');
+let orders=JSON.parse(localStorage.getItem('orders')||'[]');
 let category='hoodies';
 
 const products={
-hoodies:[{name:'Nike Hoodie',price:499,img:'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf'}],
-tshirts:[{name:'Oversized Tee',price:299,img:'https://images.unsplash.com/photo-1523381210434-271e8be1f52b'}],
-caps:[{name:'Street Cap',price:199,img:'https://images.unsplash.com/photo-1514996937319-344454492b37'}]
+hoodies:[{name:'Nike Hoodie',price:499,stock:3,img:'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf'}],
+tshirts:[{name:'Oversized Tee',price:299,stock:4,img:'https://images.unsplash.com/photo-1523381210434-271e8be1f52b'}],
+caps:[{name:'Street Cap',price:199,stock:2,img:'https://images.unsplash.com/photo-1514996937319-344454492b37'}]
 };
 
 if(user){renderShop()}else{renderLogin()}
@@ -51,86 +64,72 @@ app.innerHTML=`<div class='center'>
 <input id='password' type='password' placeholder='Password'>
 <button onclick='signup()'>Sign Up</button>
 <button onclick='login()'>Login</button>
-</div>`
-}
+</div>`}
 
-function signup(){
-let email=emailInput(); let password=passwordInput();
-localStorage.setItem(email,JSON.stringify({email,password,orders:[]}));
-localStorage.setItem('user',JSON.stringify({email}));
-sendMail('Ny bruger',email);
-renderShop();
-}
-
-function login(){
-let email=emailInput(); let password=passwordInput();
-let data=JSON.parse(localStorage.getItem(email));
-if(data&&data.password===password){
-localStorage.setItem('user',JSON.stringify({email}));
-renderShop();
-}else alert('Forkert');
-}
+function signup(){let e=email.value,p=password.value;localStorage.setItem(e,JSON.stringify({email:e,password:p}));localStorage.setItem('user',JSON.stringify({email:e}));renderShop()}
+function login(){let e=email.value,p=password.value;let d=JSON.parse(localStorage.getItem(e));if(d&&d.password===p){localStorage.setItem('user',JSON.stringify({email:e}));renderShop()}else alert('forkert')}
 
 function renderShop(){
 let list=products[category];
 app.innerHTML=`
+<div class='banner'>🔥 FINAL DROP – LIMITED 🔥</div>
 <header>
-<div class='logo'>DK RESELLS</div>
+<div class='logo' onclick='renderShop()'>DK RESELLS</div>
 <nav>
 <button onclick="change('hoodies')" class='${category==='hoodies'?'active':''}'>Hoodies</button>
 <button onclick="change('tshirts')" class='${category==='tshirts'?'active':''}'>T-Shirts</button>
 <button onclick="change('caps')" class='${category==='caps'?'active':''}'>Caps</button>
+<button onclick='showOrders()'>Orders</button>
 </nav>
-<div class='cart' onclick='toggleCart()'>🛒 ${cart.length}</div>
+<div onclick='toggleCart()'>🛒 ${cart.length}</div>
 </header>
 
-<div class='products'>
-${list.map(p=>`
+<div class='products fade'>
+${list.map((p,i)=>`
 <div class='card'>
 <img src='${p.img}'>
 <div class='card-content'>
 <h3>${p.name}</h3>
 <div class='price'>${p.price} kr</div>
-<button onclick="add('${p.name}',${p.price})">Køb</button>
+<div class='stock'>Only ${p.stock} left</div>
+<button onclick="add(${i})">Add</button>
 </div>
-</div>
-`).join('')}
+</div>`).join('')}
 </div>
 
-<div id='cartPanel' class='cart-panel'></div>
-`}
+<div id='cartPanel' class='cart-panel'></div>`}
 
 function change(c){category=c;renderShop()}
 
-function add(name,price){cart.push({name,price});save();renderShop()}
+function add(i){let p=products[category][i];if(p.stock<=0)return alert('Udsolgt');p.stock--;cart.push(p);save();renderShop()}
 
 function toggleCart(){
 let p=document.getElementById('cartPanel');
 p.classList.toggle('open');
 p.innerHTML=`<h2>Kurv</h2>
-${cart.map(i=>`<p>${i.name}</p>`).join('')}
-<button onclick='checkout()'>Checkout</button>`}
+${cart.map((i,index)=>`<p>${i.name} <button onclick='remove(${index})'>X</button></p>`).join('')}
+<button onclick='pay()'>Checkout</button>`}
 
-function checkout(){
-let u=JSON.parse(localStorage.getItem(user.email));
-u.orders.push(cart);
-localStorage.setItem(user.email,JSON.stringify(u));
-sendMail('Ny ordre',JSON.stringify(cart));
-cart=[];save();alert('Købt!');renderShop();
+function remove(i){cart.splice(i,1);save();toggleCart()}
+
+function pay(){document.getElementById('payModal').style.display='flex'}
+
+function confirmPay(){
+orders.push(cart);
+localStorage.setItem('orders',JSON.stringify(orders));
+cart=[];save();
+alert('🔥 ORDER COMPLETE');
+document.getElementById('payModal').style.display='none';
+renderShop();
+}
+
+function showOrders(){
+app.innerHTML=`<header><div onclick='renderShop()'>⬅ Back</div></header>
+<h2 style='padding:20px'>Dine ordrer</h2>
+${orders.map(o=>`<div style='padding:10px'>${o.map(i=>i.name).join(', ')}</div>`).join('')}`
 }
 
 function save(){localStorage.setItem('cart',JSON.stringify(cart))}
-
-function sendMail(subject,message){
-fetch('https://formspree.io/f/YOUR_ID',{
-method:'POST',headers:{'Content-Type':'application/json'},
-body:JSON.stringify({subject,message})});
-}
-
-function emailInput(){return document.getElementById('email').value}
-function passwordInput(){return document.getElementById('password').value}
-
 </script>
-
 </body>
 </html>
