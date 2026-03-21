@@ -3,161 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DK Resells ELITE</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+<title>DK Resells ULTRA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
 <style>
-body { margin:0; font-family:Montserrat; background:#050505; color:white; }
-header { display:flex; justify-content:space-between; padding:20px; background:#0d0d0d; }
-.logo { font-weight:900; font-size:1.6rem; }
-.cart { cursor:pointer; }
-
-.products { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:25px; padding:30px; }
-.card { background:#111; border-radius:20px; overflow:hidden; transition:.3s; position:relative; }
-.card:hover { transform:scale(1.05); box-shadow:0 0 40px #00ff88; }
-.card img { width:100%; height:250px; object-fit:cover; }
-.card-content { padding:15px; text-align:center; }
-.price { color:#00ff88; }
-button { padding:10px 20px; border:none; border-radius:10px; background:#00ff88; cursor:pointer; }
-
-.badge { position:absolute; top:10px; left:10px; background:red; padding:5px 10px; border-radius:10px; }
-
-.cart-panel { position:fixed; right:-400px; top:0; width:300px; height:100%; background:#0d0d0d; padding:20px; transition:.3s; }
-.cart-panel.open { right:0; }
-
-.modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; }
-.modal-box { background:white; color:black; padding:20px; border-radius:20px; width:300px; text-align:center; }
-
-.countdown { text-align:center; font-size:1.2rem; margin:10px; color:#00ff88; }
-
-.center { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; gap:10px; }
-input { padding:10px; border-radius:8px; border:none; }
-
+:root{--bg:#0b0b0c;--card:#121214;--accent:#0aff9d;--muted:#9aa0a6}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui;background:var(--bg);color:#fff}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:rgba(18,18,20,.7);backdrop-filter:blur(10px);position:sticky;top:0}
+.logo{font-weight:800;letter-spacing:.5px}
+nav{display:flex;gap:10px}
+nav button{background:#1b1b1e;color:#fff;border:1px solid #222;border-radius:999px;padding:8px 14px}
+nav button.active{background:#fff;color:#000}
+.cart{cursor:pointer}
+.container{max-width:1200px;margin:auto}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;padding:20px}
+.card{background:var(--card);border-radius:18px;overflow:hidden;transition:.25s;position:relative}
+.card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,.5)}
+.card img{width:100%;height:220px;object-fit:cover}
+.card-content{padding:14px;text-align:center}
+.price{color:var(--accent);font-weight:600}
+button{cursor:pointer;border:none;border-radius:12px;padding:10px 14px}
+.btn{background:var(--accent);color:#000;font-weight:600}
+.badge{position:absolute;top:10px;left:10px;background:#ff3b30;border-radius:999px;padding:4px 10px;font-size:12px}
+.stock{position:absolute;top:10px;right:10px;background:#000;border-radius:999px;padding:4px 10px;font-size:12px;color:var(--accent)}
+.cart-panel{position:fixed;right:-360px;top:0;width:320px;height:100%;background:#111;padding:16px;transition:.3s}
+.cart-panel.open{right:0}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:10px}
+input{padding:10px;border-radius:10px;border:none;width:240px;background:#1b1b1e;color:#fff}
+.admin{padding:20px;border-top:1px solid #222}
+.small{font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
-
 <div id="app"></div>
-
-<div id="payModal" class="modal">
-  <div class="modal-box">
-    <h2>MobilePay</h2>
-    <p>Godkend betaling...</p>
-    <button onclick="confirmPay()">Godkend</button>
-  </div>
-</div>
-
 <script>
-const app = document.getElementById('app');
+const app=document.getElementById('app');
 let user=null;
-let cart=[];
-let dropTime = new Date().getTime() + 600000;
+let cart=JSON.parse(localStorage.getItem('cart')||'[]');
+let currentCategory='hoodies';
+let products=JSON.parse(localStorage.getItem('products')||'null')||{
+hoodies:[{name:'Nike Hoodie',price:499,stock:2,img:'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf'}],
+tshirts:[{name:'Oversized Tee',price:299,stock:5,img:'https://images.unsplash.com/photo-1523381210434-271e8be1f52b'}],
+caps:[{name:'Street Cap',price:199,stock:3,img:'https://images.unsplash.com/photo-1514996937319-344454492b37'}]
+};
 
-function renderLogin(){
-app.innerHTML=`<div class='center'>
-<h1>DK RESELLS ELITE 😈</h1>
+function save(){localStorage.setItem('cart',JSON.stringify(cart));localStorage.setItem('products',JSON.stringify(products));}
+
+function renderLogin(){app.innerHTML=`<div class='center'>
+<h1>DK RESELLS</h1>
 <input id='email' placeholder='Email'>
+<input id='username' placeholder='Brugernavn'>
 <input id='password' type='password' placeholder='Password'>
-<button onclick='login()'>Login</button>
+<button class='btn' onclick='login()'>Login</button>
 <button onclick='signup()'>Sign Up</button>
-</div>`;
-}
+</div>`}
 
-function login(){
-if(localStorage.getItem(email.value)===password.value){ user=email.value; renderShop(); }
-else alert('forkert');
-}
+function login(){let data=JSON.parse(localStorage.getItem(email.value));if(data&&data.password===password.value){user=data;renderShop()}else alert('forkert')}
+function signup(){localStorage.setItem(email.value,JSON.stringify({email:email.value,username:username.value,password:password.value,orders:[]}));alert('oprettet')}
 
-function signup(){ localStorage.setItem(email.value,password.value); alert('oprettet'); }
-
-function renderShop(){
-const products=[
-{name:'Nike Hoodie',price:499,img:'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf'},
-{name:'Jordan 4',price:2499,img:'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb'},
-{name:'Trapstar Jacket',price:1799,img:'https://images.unsplash.com/photo-1593032465171-8b0c8b4c9cfa'}
-];
-
+function renderShop(){let list=products[currentCategory];
 app.innerHTML=`
 <header>
 <div class='logo'>DK RESELLS</div>
-<div class='cart' onclick='toggleCart()'>🛒 (${cart.length})</div>
+<nav>
+<button class='${currentCategory==='hoodies'?'active':''}' onclick="changeCategory('hoodies')">Hoodies</button>
+<button class='${currentCategory==='tshirts'?'active':''}' onclick="changeCategory('tshirts')">T-Shirts</button>
+<button class='${currentCategory==='caps'?'active':''}' onclick="changeCategory('caps')">Caps</button>
+</nav>
+<div class='cart' onclick='toggleCart()'>🛒 ${cart.length}</div>
 </header>
 
-<div class='countdown' id='countdown'></div>
-
+<div class='container'>
 <div class='products'>
-${products.map(p=>`
+${list.map((p,i)=>`
 <div class='card'>
+${p.stock<=2?"<div class='badge'>HOT</div>":""}
+<div class='stock'>${p.stock} left</div>
 <img src='${p.img}'>
 <div class='card-content'>
 <h3>${p.name}</h3>
 <div class='price'>${p.price} kr</div>
-<button onclick="addToCart('${p.name}',${p.price})">Add</button>
-</div>
-</div>
-`).join('')}
+<button class='btn' onclick="addToCart('${currentCategory}',${i})">Add</button>
+</div></div>`).join('')}
 </div>
 
-<div id='cartPanel' class='cart-panel'></div>
-`;
+<div class='admin'>
+<h3>Admin panel</h3>
+<input id='aname' placeholder='Navn'>
+<input id='aprice' placeholder='Pris'>
+<input id='aimg' placeholder='Billede URL'>
+<select id='acat'>
+<option value='hoodies'>Hoodies</option>
+<option value='tshirts'>T-Shirts</option>
+<option value='caps'>Caps</option>
+</select>
+<button onclick='addProduct()'>Upload</button>
+<p class='small'>Kun du bruger dette 😉</p>
+</div>
+</div>
 
-startCountdown();
-}
+<div id='cartPanel' class='cart-panel'></div>`}
 
-function addToCart(name,price){ cart.push({name,price}); renderShop(); }
+function changeCategory(c){currentCategory=c;renderShop()}
 
-function toggleCart(){
-let panel=document.getElementById('cartPanel');
-panel.classList.toggle('open');
-panel.innerHTML=`<h2>Kurv</h2>
-${cart.map(i=>`<p>${i.name} - ${i.price} kr</p>`).join('')}
-<button onclick='openPay()'>Checkout</button>`;
-}
+function addToCart(cat,i){let p=products[cat][i];if(p.stock<=0)return alert('udsolgt');p.stock--;cart.push(p);save();renderShop()}
 
-function openPay(){ document.getElementById('payModal').style.display='flex'; }
+function toggleCart(){let panel=document.getElementById('cartPanel');panel.classList.toggle('open');panel.innerHTML=`<h2>Kurv</h2>${cart.map(i=>`<p>${i.name}</p>`).join('')}<button class='btn' onclick='checkout()'>Checkout</button>`}
 
-function confirmPay(){
-alert('Betaling gennemført 🔥');
+function checkout(){let u=JSON.parse(localStorage.getItem(user.email));u.orders.push(cart);localStorage.setItem(user.email,JSON.stringify(u));
+fetch('https://formspree.io/f/YOUR_ID',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user,cart})});
+cart=[];save();alert('ordre sendt');renderShop()}
 
-document.getElementById('payModal').style.display='none';
-
-fetch('https://formspree.io/f/YOUR_ID',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({user,cart})
-});
-
-cart=[];
-renderShop();
-}
-
-function startCountdown(){
-setInterval(()=>{
-let now=new Date().getTime();
-let diff=dropTime-now;
-let min=Math.floor(diff/60000);
-let sec=Math.floor((diff%60000)/1000);
-let el=document.getElementById('countdown');
-if(el) el.innerHTML=`NEXT DROP: ${min}m ${sec}s`;
-},1000);
-}
+function addProduct(){let n=aname.value,p=aprice.value,img=aimg.value,c=acat.value;products[c].push({name:n,price:p,img,stock:5});save();renderShop()}
 
 renderLogin();
 </script>
-
 </body>
 </html>
-
-<!--
-😈 ELITE FEATURES:
-- Fake MobilePay popup
-- Countdown drops
-- Kurv + checkout
-- Email system
-
-🚀 Hvis du vil helt crazy:
-- Admin panel (tilføj produkter live)
-- Database (rigtige users)
-- Stripe betaling
--->
 
